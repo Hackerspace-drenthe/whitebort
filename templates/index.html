@@ -1,15 +1,34 @@
 <html>
-  <head>
+<head>
     <title>WhiteBort status page</title>
-  </head>
-  <body>
+</head>
 
-    <h1>Camera input stream:</h1>
-    <img src="{{ url_for('stream_input_stream') }}">
+<body>
 
-    <h1>Transformed:</h1>
-    <img src="{{ url_for('stream_transformed') }}">
+<h1>Camera input stream:</h1>
+<img id="input_stream" src="{{ url_for('stream_input_stream') }}" style="cursor: crosshair">
+<p>
+    Mouse: x=<span id="x"></span> y=<span id="y"></span>
+</p>
+
+<h1>Transformed:</h1>
+<img src="{{ url_for('stream_transformed') }}">
 
 
-  </body>
+<script>
+
+    console.log(document.getElementById("input_stream"));
+    document.getElementById("input_stream").addEventListener('mousemove', (e) => {
+        var img=document.getElementById("input_stream")
+        var xperc=Math.round((e.offsetX/img.width)*1000)/1000;
+        var yperc=Math.round((e.offsetY/img.height)*1000)/1000;
+        document.getElementById("x").textContent = xperc;
+        document.getElementById("y").textContent = yperc;
+
+
+    })
+</script>
+
+</body>
+
 </html>

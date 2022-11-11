@@ -38,4 +38,4 @@ def stream_transformed():
 
 input_stream=CameraOpenCV()
 transformed=CameraTransform(input_stream)
-app.run(host='0.0.0.0', threaded=True)
+app.run(host='0.0.0.0', threaded=True, debug=True, use_reloader=False)
