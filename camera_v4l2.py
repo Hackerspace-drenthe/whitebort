@@ -2,10 +2,10 @@ import io
 from PIL import Image
 import select
 import v4l2capture
-from base_camera import BaseCamera
+from whitebort import Whitebort
 
 
-class CameraV4l2(BaseCamera):
+class CameraV4l2(Whitebort):
     """Requires python-v4l2capture module: https://github.com/gebart/python-v4l2capture"""
 
     video_source = "/dev/video0"

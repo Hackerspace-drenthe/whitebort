@@ -1,6 +1,6 @@
 import os
 import cv2
-from base_camera import BaseCamera
+from whitebort import Whitebort
 import numpy as np
 
 
@@ -237,15 +237,3 @@ def whiteboard_enhance(img):
 
 
 
-class CameraWhiteboardEnhance(BaseCamera):
-    """applies whiteboard filtering/sharpening/enhancements"""
-
-    def __init__(self, input_camera: BaseCamera):
-        self.input_camera = input_camera
-        super().__init__()
-
-    def frames(self):
-        while True:
-            input_frame = self.input_camera.get_frame()
-
-            yield whiteboard_enhance(input_frame)

@@ -1,11 +1,11 @@
 import io
 import time
 import picamera
-from base_camera import BaseCamera
+from whitebort import Whitebort
 import numpy
 
 
-class CameraPi(BaseCamera):
+class CameraPi(Whitebort):
     @staticmethod
     def frames():
 
