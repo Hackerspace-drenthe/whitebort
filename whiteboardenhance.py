@@ -1,6 +1,5 @@
 import os
 import cv2
-from whitebort import Whitebort
 import numpy as np
 
 

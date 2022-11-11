@@ -1,6 +1,8 @@
 import threading
 import time
 
+import transform
+import whiteboardenhance
 from camera import Camera
 from clientevent import ClientEvent
 
@@ -33,16 +35,19 @@ class Whitebort(object):
         self.event.wait()
         self.event.clear()
 
-        return [self.input_frame]
+        return [self.input_frame, self.transform_frame, self.whiteboardenhance_frame]
 
     def _thread(self):
         """Camera background thread."""
         print('Starting camera thread.')
 
         while True:
+            print("Read...")
             self.input_frame=self.camera.get_frame()
-
-            #....
+            print("Transform...")
+            self.transform_frame=transform.transform(self.input_frame)
+            print("Enhance...")
+            self.whiteboardenhance_frame=whiteboardenhance.whiteboard_enhance(self.transform_frame)
 
             self.event.set()  # send signal to clients
             time.sleep(0)

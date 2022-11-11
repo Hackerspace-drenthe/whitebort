@@ -1,33 +1,30 @@
 import io
 import time
 import picamera
-from whitebort import Whitebort
 import numpy
 
+from camera import Camera
 
-class CameraPi(Whitebort):
-    @staticmethod
-    def frames():
 
-        #HD
-        x_res=1920
-        y_res=1088
+class CameraPi(Camera):
+
+    def __init__(self, **kwargs):
+        self.x_res=1920
+        self.y_res=1088
         # x_res*=2
         # y_res*=2
         #
         # HQ cam
         # x_res=4056
         # y_res=3040
-        with picamera.PiCamera() as camera:
 
-            camera.resolution = (x_res, y_res)
-            camera.framerate = 1
-            time.sleep(2)
+        self.camera=picamera.PiCamera()
+        self.camera.resolution = (x_res, y_res)
+        self.camera.framerate = 1
 
-            while True:
-                image = numpy.empty((y_res * x_res * 3,), dtype=numpy.uint8)
-                camera.capture(image, 'bgr')
-                image = image.reshape((y_res, x_res, 3))
+    def get_frame(self):
 
-
-                yield image
+        image = numpy.empty((self.y_res * self.x_res * 3,), dtype=numpy.uint8)
+        self.camera.capture(image, 'bgr')
+        image = image.reshape((self.y_res, self.x_res, 3))
+        return image

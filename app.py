@@ -6,6 +6,7 @@ import cv2
 from importlib import import_module
 import os
 from flask import Flask, render_template, Response
+from _thread import get_ident
 
 
 
@@ -26,7 +27,8 @@ def stream_generator(frame_generator, nr):
     yield b'--frame\r\n'
     while True:
         frame = whitebort.get_frames()[nr]
-        jpg=cv2.imencode('.jpg', frame)[1].tobytes() #TODO: move
+        # print("Encode for client {}...".format(get_ident()))
+        jpg=cv2.imencode('.jpg', frame)[1].tobytes() #TODO: move? (now its processed for every client)
         yield b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n--frame\r\n'
 
 
