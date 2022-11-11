@@ -24,6 +24,8 @@ class CameraEvent(object):
             # add an entry for it in the self.events dict
             # each entry has two elements, a threading.Event() and a timestamp
             self.events[ident] = [threading.Event(), time.time()]
+            #first time, so dont wait
+            return
         return self.events[ident][0].wait()
 
     def set(self):
@@ -69,7 +71,8 @@ class BaseCamera(object):
         self.thread.start()
 
         # wait until first frame is available
-        #self.event.wait()
+        self.event.wait()
+        self.event.wait()
 
     def get_frame(self):
         """Return the current camera frame."""
@@ -92,12 +95,12 @@ class BaseCamera(object):
         for frame in frames_iterator:
             self.frame = frame
             self.event.set()  # send signal to clients
-            time.sleep(self.frame_delay)
+            time.sleep(0)
 
             # if there hasn't been any clients asking for frames in
             # the last 10 seconds then stop the thread
-            if time.time() - self.last_access > 10:
-                frames_iterator.close()
-                print('Stopping camera thread due to inactivity.')
-                break
+            # if time.time() - self.last_access > 10:
+            #     frames_iterator.close()
+            #     print('Stopping camera thread due to inactivity.')
+            #     break
         self.thread = None

@@ -41,7 +41,7 @@ def stream_enhanced():
     return Response(gen(enhanced),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-input_stream=CameraOpenCV()
+input_stream=CameraOpenCV(frame_delay=1)
 transformed=CameraTransform(input_stream)
 enhanced=CameraWhiteboardEnhance(transformed)
 app.run(host='0.0.0.0', threaded=True, debug=True, use_reloader=False)

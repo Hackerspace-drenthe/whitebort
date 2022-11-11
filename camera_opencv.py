@@ -1,16 +1,18 @@
 import os
+import time
+
 import cv2
 from base_camera import BaseCamera
 
 
 class CameraOpenCV(BaseCamera):
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.video_source = 0
 
         if os.environ.get('OPENCV_CAMERA_SOURCE'):
             self.set_video_source(int(os.environ['OPENCV_CAMERA_SOURCE']))
-        super(CameraOpenCV, self).__init__()
+        super(CameraOpenCV, self).__init__(**kwargs)
 
     def set_video_source(self,source):
         self.video_source = source
@@ -29,6 +31,7 @@ class CameraOpenCV(BaseCamera):
             # read current frame
             _, img = camera.read()
 
-
             # yield raw frames for further processing
             yield img
+
+            time.sleep(self.frame_delay)
