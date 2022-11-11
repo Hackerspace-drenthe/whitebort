@@ -26,13 +26,18 @@ def gen(camera):
         yield b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n--frame\r\n'
 
 
-@app.route('/input_stream')
-def input_stream():
+@app.route('/stream_input_stream')
+def stream_input_stream():
     return Response(gen(input_stream),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/stream_transformed')
+def stream_transformed():
+    return Response(gen(transformed),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
 input_stream=CameraOpenCV()
-# transformed=CameraTransform(input_stream)
+transformed=CameraTransform(input_stream)
 
 
 if __name__ == '__main__':

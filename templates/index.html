@@ -3,7 +3,13 @@
     <title>WhiteBort status page</title>
   </head>
   <body>
+
     <h1>Camera input stream:</h1>
-    <img src="{{ url_for('input_stream') }}">
+    <img src="{{ url_for('stream_input_stream') }}">
+
+    <h1>Transformed:</h1>
+    <img src="{{ url_for('stream_transformed') }}">
+
+
   </body>
 </html>
