@@ -1,0 +1,4 @@
+#!/bin/bash
+
+find | entr -s 'scp *py *txt campi:; scp -r templates campi:'
+
