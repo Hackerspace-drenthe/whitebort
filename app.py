@@ -6,6 +6,7 @@ from flask import Flask, render_template, Response
 
 from camera_opencv import CameraOpenCV
 from camera_transform import CameraTransform
+from camera_whiteboardenhance import CameraWhiteboardEnhance
 
 app = Flask(__name__)
 
@@ -32,10 +33,15 @@ def stream_input_stream():
 
 @app.route('/stream_transformed')
 def stream_transformed():
-    print("JO")
     return Response(gen(transformed),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/enhanced')
+def stream_enhanced():
+    return Response(gen(enhanced),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 input_stream=CameraOpenCV()
 transformed=CameraTransform(input_stream)
+enhanced=CameraWhiteboardEnhance(transformed)
 app.run(host='0.0.0.0', threaded=True, debug=True, use_reloader=False)

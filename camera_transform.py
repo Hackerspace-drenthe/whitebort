@@ -15,10 +15,10 @@ class CameraTransform(BaseCamera):
         while True:
             input_frame = self.input_camera.get_frame()
 
-            top_left_factor = (0.272, 0.281)
-            top_right_factor = (0.741, 0.04)
-            bottom_left_factor = (0.098, 0.988)
-            bottom_right_factor = (0.98, 0.723)
+            top_left_factor = (0.283,0.302)
+            top_right_factor = (0.708,0.077)
+            bottom_left_factor =(0.1,0.977)
+            bottom_right_factor =(0.9,0.733)
 
             rows, cols, ch = input_frame.shape
             top_left = [int(cols * top_left_factor[0]), int(rows * top_left_factor[1])]

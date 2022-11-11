@@ -53,12 +53,13 @@ class CameraEvent(object):
 
 class BaseCamera(object):
 
-    def __init__(self):
+    def __init__(self, frame_delay=0):
 
         self.thread = None  # background thread that reads frames from camera
         self.frame = None  # current frame is stored here by background thread
         self.last_access = 0  # time of last client access to the camera
         self.event = CameraEvent()
+        self.frame_delay=frame_delay
 
         """Start the background camera thread if it isn't running yet."""
         self.last_access = time.time()
@@ -91,7 +92,7 @@ class BaseCamera(object):
         for frame in frames_iterator:
             self.frame = frame
             self.event.set()  # send signal to clients
-            time.sleep(0)
+            time.sleep(self.frame_delay)
 
             # if there hasn't been any clients asking for frames in
             # the last 10 seconds then stop the thread
