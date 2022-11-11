@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#modified from https://github.com/miguelgrinberg/flask-video-streaming
+
 import cv2
 from importlib import import_module
 import os
