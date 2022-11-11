@@ -49,12 +49,17 @@ class CameraTransform(BaseCamera):
                     bottom_left,
                 ])
 
+            target_top_left=top_left
+            target_top_right=(top_right[0], top_left[1])
+            target_bottom_left=(top_left[0], bottom_left[1])
+            target_bottom_right=(top_right[0], bottom_left[1])
+
             pts2 = numpy.float32(
                 [
-                    [cols*0.1, 0],
-                    [cols, 0 ],
-                    [cols, rows],
-                    [cols*0.1, rows],
+                    target_top_left,
+                    target_top_right,
+                    target_bottom_right,
+                    target_bottom_left
                  ]
             )
             #scew
