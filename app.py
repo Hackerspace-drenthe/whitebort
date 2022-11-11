@@ -4,7 +4,9 @@ from importlib import import_module
 import os
 from flask import Flask, render_template, Response
 
-from camera_opencv import CameraOpenCV
+
+
+
 from camera_transform import CameraTransform
 from camera_whiteboardenhance import CameraWhiteboardEnhance
 
@@ -41,7 +43,14 @@ def stream_enhanced():
     return Response(gen(enhanced),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-input_stream=CameraOpenCV(frame_delay=1)
+if os.environ.get('CAMERA')=='pi':
+    from camera_pi import CameraPi
+    input_stream = CameraPi(frame_delay=1)
+else:
+    from camera_opencv import CameraOpenCV
+    input_stream = CameraOpenCV(frame_delay=1)
+
+
 transformed=CameraTransform(input_stream)
 enhanced=CameraWhiteboardEnhance(transformed)
 app.run(host='0.0.0.0', threaded=True, debug=True, use_reloader=False)

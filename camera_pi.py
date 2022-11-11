@@ -2,22 +2,32 @@ import io
 import time
 import picamera
 from base_camera import BaseCamera
+import numpy
 
 
 class CameraPi(BaseCamera):
     @staticmethod
     def frames():
+
+        #HD
+        x_res=1920
+        y_res=1088
+        # x_res*=2
+        # y_res*=2
+        #
+        # HQ cam
+        # x_res=4056
+        # y_res=3040
         with picamera.PiCamera() as camera:
-            # let camera warm up
+
+            camera.resolution = (x_res, y_res)
+            camera.framerate = 1
             time.sleep(2)
 
-            stream = io.BytesIO()
-            for _ in camera.capture_continuous(stream, 'jpeg',
-                                                 use_video_port=True):
-                # return current frame
-                stream.seek(0)
-                yield stream.read()
+            while True:
+                image = numpy.empty((y_res * x_res * 3,), dtype=numpy.uint8)
+                camera.capture(image, 'bgr')
+                image = image.reshape((y_res, x_res, 3))
 
-                # reset stream for next frame
-                stream.seek(0)
-                stream.truncate()
+
+                yield image

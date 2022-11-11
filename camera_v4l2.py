@@ -28,6 +28,8 @@ class CameraV4l2(BaseCamera):
                 image_data = video.read_and_queue()
                 image = Image.frombytes("RGB", (size_x, size_y), image_data)
                 image.save(bio, format="jpeg")
+
+                XXX fix me: should return raw opencv compatible frame
                 yield bio.getvalue()
                 bio.seek(0)
                 bio.truncate()
