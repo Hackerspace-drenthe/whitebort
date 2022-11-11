@@ -1,8 +1,0 @@
-click
-Flask
-itsdangerous
-Jinja2
-MarkupSafe
-Werkzeug
-numpy
-opencv-python==4.5.5.64

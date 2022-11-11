@@ -3,7 +3,6 @@
 #modified from https://github.com/miguelgrinberg/flask-video-streaming
 
 import cv2
-from importlib import import_module
 import os
 from flask import Flask, render_template, Response
 from _thread import get_ident

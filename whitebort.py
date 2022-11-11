@@ -5,7 +5,8 @@ import transform
 import whiteboardenhance
 from camera import Camera
 from clientevent import ClientEvent
-
+import compare
+import cv2
 
 class Whitebort(object):
 
@@ -41,6 +42,7 @@ class Whitebort(object):
         """Camera background thread."""
         print('Starting camera thread.')
 
+        prev_transform_frame=None
         while True:
             print("Read...")
             self.input_frame=self.camera.get_frame()
@@ -48,6 +50,14 @@ class Whitebort(object):
             self.transform_frame=transform.transform(self.input_frame)
             print("Enhance...")
             self.whiteboardenhance_frame=whiteboardenhance.whiteboard_enhance(self.transform_frame)
+
+            if prev_transform_frame is not None:
+                print("Compare...")
+                score=compare.compare(prev_transform_frame, self.transform_frame, self.whiteboardenhance_frame)
+                print(score)
+                cv2.putText(self.whiteboardenhance_frame, "{}".format(score), (10,100), cv2.FONT_HERSHEY_SIMPLEX,2, (0,255,0),2  )
+            prev_transform_frame=self.transform_frame
+
 
             self.event.set()  # send signal to clients
             time.sleep(0)
