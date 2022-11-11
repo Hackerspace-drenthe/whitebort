@@ -5,7 +5,7 @@ import v4l2capture
 from base_camera import BaseCamera
 
 
-class Camera(BaseCamera):
+class CameraV4l2(BaseCamera):
     """Requires python-v4l2capture module: https://github.com/gebart/python-v4l2capture"""
 
     video_source = "/dev/video0"
