@@ -8,7 +8,9 @@
 <h1>Camera input stream:</h1>
 <img id="input_stream" src="{{ url_for('stream_input_stream') }}" style="cursor: crosshair">
 <p>
-    Mouse: x=<span id="x"></span> y=<span id="y"></span>
+    Mouse:
+</p>
+ <p>(<span id="x"></span>, <span id="y"></span>)
 </p>
 
 <h1>Transformed:</h1>
@@ -18,12 +20,14 @@
 <script>
 
     console.log(document.getElementById("input_stream"));
-    document.getElementById("input_stream").addEventListener('mousemove', (e) => {
+    document.getElementById("input_stream").addEventListener('mousedown', (e) => {
         var img=document.getElementById("input_stream")
         var xperc=Math.round((e.offsetX/img.width)*1000)/1000;
         var yperc=Math.round((e.offsetY/img.height)*1000)/1000;
         document.getElementById("x").textContent = xperc;
         document.getElementById("y").textContent = yperc;
+          navigator.clipboard.writeText(`(${xperc},${yperc})`);
+
 
 
     })

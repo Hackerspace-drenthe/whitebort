@@ -16,23 +16,51 @@ class CameraTransform(BaseCamera):
         while True:
             input_frame=self.input_camera.get_frame()
 
+            top_left_factor=(0.272, 0.281)
+            top_right_factor=(0.741, 0.04)
+            bottom_left_factor=(0.098, 0.988)
+            bottom_right_factor=(0.98,0.723)
+
+
             rows, cols, ch = input_frame.shape
+            top_left=[int(cols * top_left_factor[0]), int(rows * top_left_factor[1])]
+            top_right=[int(cols * top_right_factor[0]), int(rows * top_right_factor[1])]
+            bottom_left=[int(cols * bottom_left_factor[0]), (rows * bottom_left_factor[1])]
+            bottom_right=[int(cols * bottom_right_factor[0]), int(rows * bottom_right_factor[1])]
+
+            # cv2.line(input_frame, top_left, top_right , (0,255,0),1)
+            # cv2.line(input_frame, top_left, top_right , (0,255,0),1)
+            # cv2.line(input_frame, top_left, top_right , (0,255,0),1)
+            # cv2.line(input_frame, top_left, top_right , (0,255,0),1)
+
+            polypts = numpy.array([
+                top_left,
+                 top_right,
+                 bottom_right,
+                bottom_left,
+            ], numpy.int32)
+            cv2.polylines(input_frame, [polypts], True, (0,255,0))
+
             pts1 = numpy.float32(
-                [[cols * .25, rows * .95],
-                 [cols * .90, rows * .95],
-                 [cols * .10, 0],
-                 [cols, 0]]
-            )
+                [
+                    top_left,
+                    top_right,
+                    bottom_right,
+                    bottom_left,
+                ])
+
             pts2 = numpy.float32(
-                [[cols * 0.5, rows],
-                 [cols, rows],
-                 [0, 0],
-                 [cols, 0]]
+                [
+                    [cols*0.1, 0],
+                    [cols, 0 ],
+                    [cols, rows],
+                    [cols*0.1, rows],
+                 ]
             )
             #scew
             M = cv2.getPerspectiveTransform(pts1, pts2)
             result = cv2.warpPerspective(input_frame, M, (cols, rows))
 
-            # encode as a jpeg image and return it
-            # yield cv2.imencode('.jpg', img)[1].tobytes()
+
             yield result
+            # yield input_frame
