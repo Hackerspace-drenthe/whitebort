@@ -21,8 +21,7 @@ def gen(camera):
     yield b'--frame\r\n'
     while True:
         frame = camera.get_frame()
-
-        jpg=cv2.imencode('.jpg', frame)[1].tobytes()
+        jpg=cv2.imencode('.jpg', frame)[1].tobytes() #TODO: move
         yield b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n--frame\r\n'
 
 
@@ -33,13 +32,10 @@ def stream_input_stream():
 
 @app.route('/stream_transformed')
 def stream_transformed():
+    print("JO")
     return Response(gen(transformed),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 input_stream=CameraOpenCV()
 transformed=CameraTransform(input_stream)
-
-
-if __name__ == '__main__':
-
-    app.run(host='0.0.0.0', threaded=True)
+app.run(host='0.0.0.0', threaded=True)
