@@ -2,6 +2,8 @@
 import cv2
 from skimage.metrics import structural_similarity
 
+
+
 def mark_rect(mark, p1, p2, on=10, step=20, thick=1):
 
     for x in range(p1[0], p2[0], step):
@@ -45,7 +47,7 @@ def compare(before, after, mark):
 
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 250:
+        if area > 400:
             print("contour:", area)
             x, y, w, h = cv2.boundingRect(c)
             # cv2.rectangle(before, (x, y), (x + w, y + h), (36, 255, 12), 2)
