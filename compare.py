@@ -25,8 +25,14 @@ def compare(before, after, mark):
     before_gray = cv2.cvtColor(before, cv2.COLOR_BGR2GRAY)
     after_gray = cv2.cvtColor(after, cv2.COLOR_BGR2GRAY)
 
+    # before_gray=cv2.fastNlMeansDenoising(before_gray)
+    # after_gray=cv2.fastNlMeansDenoising(after_gray)
+
     # Compute SSIM between the two images
-    (score, diff) = structural_similarity(before_gray, after_gray, full=True, win_size=win_size)
+    (score, diff) = structural_similarity(before_gray, after_gray, full=True,  gaussian_weights=True, sigma=0.25)
+    # (score, diff) = structural_similarity(before_gray, after_gray, full=True,  win_size=3, data_range=1000)
+    # (score, diff) = structural_similarity(before_gray, after_gray, full=True,  gaussian_weights=True, sigma=0.25,data_range=1000)
+
 
 
     # The diff image contains the actual image differences between the two images
@@ -47,7 +53,7 @@ def compare(before, after, mark):
 
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 400:
+        if area > 100:
             print("contour:", area)
             x, y, w, h = cv2.boundingRect(c)
             # cv2.rectangle(before, (x, y), (x + w, y + h), (36, 255, 12), 2)

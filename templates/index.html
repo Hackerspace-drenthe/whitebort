@@ -5,34 +5,14 @@
 
 <body>
 
-<h1>Camera input stream:</h1>
-<img id="input_stream" src="/stream/0" style="cursor: crosshair">
-<p>
-    Mouse:
-</p>
- <p>(<span id="x"></span>, <span id="y"></span>)
-</p>
-
-<h1>Transformed:</h1>
-<img src="/stream/1">
-
-<h1>Enhanced:</h1>
+<a href="select.html">Show selected area</a>
+<h1>Status:</h1>
 <img src="/stream/2">
+
+
 
 <script>
 
-    console.log(document.getElementById("input_stream"));
-    document.getElementById("input_stream").addEventListener('mousedown', (e) => {
-        var img=document.getElementById("input_stream")
-        var xperc=Math.round((e.offsetX/img.width)*1000)/1000;
-        var yperc=Math.round((e.offsetY/img.height)*1000)/1000;
-        document.getElementById("x").textContent = xperc;
-        document.getElementById("y").textContent = yperc;
-          navigator.clipboard.writeText(`(${xperc},${yperc})`);
-
-
-
-    })
 </script>
 
 </body>
