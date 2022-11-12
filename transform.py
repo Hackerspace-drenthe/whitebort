@@ -1,14 +1,11 @@
 import os
 import cv2
 import numpy
+from settings import top_left_factor, top_right_factor, bottom_left_factor, bottom_right_factor
 
 def transform(input_frame):
     """crops/scews image"""
 
-    top_left_factor = (0.331,0.287)
-    top_right_factor =           (0.658,0.071)
-    bottom_left_factor =   (0.214,0.992)
-    bottom_right_factor =       (0.807,0.74)
 
     rows, cols, ch = input_frame.shape
     top_left = [int(cols * top_left_factor[0]), int(rows * top_left_factor[1])]
