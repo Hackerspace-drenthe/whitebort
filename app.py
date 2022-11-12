@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+import argparse
 import sys
+import settings
 
 #modified from https://github.com/miguelgrinberg/flask-video-streaming
 
@@ -46,13 +48,17 @@ def stream(id):
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-if os.environ.get('CAMERA')=='pi':
+
+if settings.mode=='pi':
     from camera_pi import CameraPi
     camera = CameraPi(frame_delay=1)
-elif os.environ.get('CAMERA')=='opencv':
+elif settings.mode=='opencv':
     from camera_opencv import CameraOpenCV
     camera = CameraOpenCV(frame_delay=1)
-else:
+elif settings.mode == 'url':
+    from camera_url import CameraURL
+    camera = CameraURL(settings.url, frame_delay=0)
+elif settings.mode=='test':
     from camera_test import CameraTest
     camera = CameraTest()
 
