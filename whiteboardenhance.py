@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-
+import settings
 
 #Based on:
 # https://santhalakshminarayana.github.io/blog/whiteboard-image-enhancement-opencv-python
@@ -207,28 +207,36 @@ def whiteboard_enhance(img):
     # dog_k_size, dog_sigma_1, dog_sigma_2 = 15, 100, 0
     # cs_black_per, cs_white_per = 2, 99.5
     # gauss_k_size, gauss_sigma = 3, 1
-    # gamma_value = 1.1
+    # gamma_value = 1.16
     # cb_black_per, cb_white_per = 2, 1
 
     # ksize is belangrijkste bij andere resolutie
-    dog_k_size = 5 * 15  # 1920x1080
+    #dog_k_size = 150
 
     dog_sigma_1, dog_sigma_2 = 100, 0
+    cs_black_per, cs_white_per = 0.01, 0.5
     cs_black_per, cs_white_per = 2, 99.5
+
     gauss_k_size, gauss_sigma = 3, 1
     gamma_value = 1.1
     cb_black_per, cb_white_per = 2, 0.5
 
     # Difference of Gaussian (DoG)
-    dog_img = dog(img, dog_k_size, dog_sigma_1, dog_sigma_2)
+    dog_img = dog(img, settings.dog_k_size, dog_sigma_1, dog_sigma_2)
+
     # Negative of image
     negative_img = negate(dog_img)
+
     # Contrast Stretch (CS)
     contrast_stretch_img = contrast_stretch(negative_img, cs_black_per, cs_white_per)
+    return contrast_stretch_img
+
     # Gaussian Blur
     blur_img = fast_gaussian_blur(contrast_stretch_img, gauss_k_size, gauss_sigma)
+
     # Gamma Correction
     gamma_img = gamma(blur_img, gamma_value)
+
     # Color Balance (CB) (also Contrast Stretch)
     color_balanced_img = color_balance(gamma_img, cb_black_per, cb_white_per)
 
