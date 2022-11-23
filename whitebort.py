@@ -18,6 +18,8 @@ class Whitebort(object):
         self.last_access = 0  # time of last client access to the camera
         self.event = ClientEvent()
         self.frame_delay=frame_delay
+        self.whiteboardenhance_frame=None
+        self.sent_whiteboardenhance_frame=None
 
         """Start the background camera thread if it isn't running yet."""
         self.last_access = time.time()
@@ -36,28 +38,55 @@ class Whitebort(object):
         self.event.wait()
         self.event.clear()
 
-        return [self.input_frame, self.transform_frame, self.whiteboardenhance_frame]
+        return [self.input_frame, self.transform_frame, self.whiteboardenhance_frame, self.sent_whiteboardenhance_frame]
 
     def _thread(self):
         """Camera background thread."""
         print('Starting camera thread.')
 
         prev_transform_frame=None
+
+        sent_transform_frame=None
+
+
         while True:
             print("Read...")
             self.input_frame=self.camera.get_frame()
             print("Transform...")
             self.transform_frame=transform.transform(self.input_frame)
+
             print("Enhance...")
-            self.whiteboardenhance_frame=whiteboardenhance.whiteboard_enhance(self.transform_frame)
+            self.whiteboardenhance_frame = whiteboardenhance.whiteboard_enhance(self.transform_frame)
+
+            if sent_transform_frame is None:
+                sent_transform_frame=self.transform_frame
+
 
             if prev_transform_frame is not None:
                 print("Compare...")
-                score=compare.compare(prev_transform_frame, self.transform_frame, self.whiteboardenhance_frame)
-                print(score)
-                cv2.putText(self.whiteboardenhance_frame, "{}".format(score), (10,100), cv2.FONT_HERSHEY_SIMPLEX,2, (0,255,0),2  )
-            prev_transform_frame=self.transform_frame
+                change_count=compare.compare(prev_transform_frame, self.transform_frame)
 
+
+                #no changes since last frame?
+                if change_count==0:
+                    #check again last sent frame:
+
+                    cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
+                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+
+                    sent_change_count = compare.compare(sent_transform_frame, self.transform_frame,
+                                                   self.whiteboardenhance_frame)
+                    #there are actual usefull changes compared to last sent:
+                    if sent_change_count!=0:
+                        print("Detected {} usefull changes. Sending...".format(sent_change_count))
+
+                        sent_transform_frame=self.transform_frame
+                        self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
+
+                else:
+                    print("detected movement: {} changes".format(change_count))
+
+            prev_transform_frame=self.transform_frame
 
             self.event.set()  # send signal to clients
             time.sleep(0)

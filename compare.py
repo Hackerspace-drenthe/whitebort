@@ -15,7 +15,7 @@ def mark_rect(mark, p1, p2, on=10, step=20, thick=1):
         cv2.line(mark, (p2[0],y), (p2[0], y + on), (128, 128, 128), thick)
 
 
-def compare(before, after, mark):
+def compare(before, after, mark=None):
     """compare before and after, and mark differces in mark. returns similarity score """
 
     #winsize is belangrijk voor grootte van detectie
@@ -51,13 +51,16 @@ def compare(before, after, mark):
     # mask = np.zeros(before.shape, dtype='uint8')
     # filled_after = after.copy()
 
+    change_count=0
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 100:
+        if area > 100 and area<100000:
+            change_count=change_count+1
             print("contour:", area)
             x, y, w, h = cv2.boundingRect(c)
             # cv2.rectangle(before, (x, y), (x + w, y + h), (36, 255, 12), 2)
-            mark_rect(mark, (x, y), (x + w, y + h))
+            if mark is not None:
+                mark_rect(mark, (x, y), (x + w, y + h))
             # cv2.rectangle(diff_box, (x, y), (x + w, y + h), (36, 255, 12), 2)
             # cv2.drawContours(mask, [c], 0, (255, 255, 255), -1)
             # cv2.drawContours(filled_after, [c], 0, (0, 255, 0), -1)
@@ -72,4 +75,5 @@ def compare(before, after, mark):
     # cv2.waitKey()
 
 
-    return score
+    # return score
+    return change_count
