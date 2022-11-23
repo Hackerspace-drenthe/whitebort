@@ -19,7 +19,7 @@ def compare(before, after, mark=None):
     """compare before and after, and mark differces in mark. returns similarity score """
 
     #winsize is belangrijk voor grootte van detectie
-    win_size=5
+    win_size=2.5
 
     # Convert images to grayscale
     before_gray = cv2.cvtColor(before, cv2.COLOR_BGR2GRAY)
@@ -54,7 +54,7 @@ def compare(before, after, mark=None):
     change_count=0
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 100 and area<100000:
+        if area > 10 and area<100000:
             change_count=change_count+1
             print("contour:", area)
             x, y, w, h = cv2.boundingRect(c)

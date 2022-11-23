@@ -54,25 +54,26 @@ class Whitebort(object):
             self.input_frame=self.camera.get_frame()
             print("Transform...")
             self.transform_frame=transform.transform(self.input_frame)
+            if sent_transform_frame is None:
+                sent_transform_frame=self.transform_frame
 
             print("Enhance...")
             self.whiteboardenhance_frame = whiteboardenhance.whiteboard_enhance(self.transform_frame)
+            if self.sent_whiteboardenhance_frame is None:
+                self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
 
-            if sent_transform_frame is None:
-                sent_transform_frame=self.transform_frame
 
 
             if prev_transform_frame is not None:
                 print("Compare...")
-                change_count=compare.compare(prev_transform_frame, self.transform_frame)
+                change_count=compare.compare(prev_transform_frame, self.transform_frame, self.whiteboardenhance_frame)
 
+                cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
+                            cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
                 #no changes since last frame?
                 if change_count==0:
                     #check again last sent frame:
-
-                    cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
                     sent_change_count = compare.compare(sent_transform_frame, self.transform_frame,
                                                    self.whiteboardenhance_frame)
