@@ -56,7 +56,7 @@ def compare(before, after, mark=None):
         area = cv2.contourArea(c)
         if area > 10 and area<100000:
             change_count=change_count+1
-            print("contour:", area)
+            # print("contour:", area)
             x, y, w, h = cv2.boundingRect(c)
             # cv2.rectangle(before, (x, y), (x + w, y + h), (36, 255, 12), 2)
             if mark is not None:

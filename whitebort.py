@@ -54,6 +54,7 @@ class Whitebort(object):
 
             print("Read...")
             self.input_frame=self.camera.get_frame()
+
             print("Transform...")
             self.transform_frame=transform.transform(self.input_frame)
             if sent_transform_frame is None:
@@ -71,10 +72,9 @@ class Whitebort(object):
                 cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
-                #no changes since last frame?
+                #no changes compared to last frame?
                 if change_count==0:
                     #check again last sent frame:
-
                     sent_change_count = compare.compare(sent_transform_frame, self.transform_frame,
                                                    self.whiteboardenhance_frame)
                     #there are actual usefull changes compared to last sent:
