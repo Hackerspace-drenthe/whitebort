@@ -31,14 +31,21 @@ def select():
 
 def stream_generator(frame_generator, nr):
     """Video streaming generator function."""
-    yield b'--frame\r\n'
-    while True:
-        frame = whitebort.get_frames()[nr]
-        # print("Encode for client {}...".format(get_ident()))
+
+    def send(wait):
+        frame = whitebort.get_frames(wait=wait)[nr]
         jpg=cv2.imencode('.jpg', frame)[1].tobytes() #TODO: move? (now its processed for every client)
-
-
         yield b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n--frame\r\n'
+
+    yield b'--frame\r\n'
+
+    #buffer..
+    yield from send(wait=False)
+    yield from send(wait=False)
+    yield from send(wait=False)
+
+    while True:
+        yield from send(wait=True)
 
 
 @app.route('/stream/<id>')

@@ -30,13 +30,14 @@ class Whitebort(object):
 
         self.input_frame=[]
 
-    def get_frames(self):
+    def get_frames(self, wait=True):
         """Wait until a frame is processed and get all in-between processing steps"""
         self.last_access = time.time()
 
         # wait for a signal from the camera thread
-        self.event.wait()
-        self.event.clear()
+        if wait:
+            self.event.wait()
+            self.event.clear()
 
         return [self.input_frame, self.transform_frame, self.whiteboardenhance_frame, self.sent_whiteboardenhance_frame]
 
@@ -90,5 +91,6 @@ class Whitebort(object):
             prev_transform_frame=self.transform_frame
 
             self.event.set()  # send signal to clients
-            time.sleep(0)
+            print("Sleep...")
+            time.sleep(5)
 
