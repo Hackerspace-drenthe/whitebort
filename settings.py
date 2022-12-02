@@ -1,6 +1,7 @@
 ### step 1: get images from a camera
 url="http://10.0.0.6:5000"
 mode="opencv" # can be opencv, pi, test, url
+frame_time=5
 
 ### step 2: what part of the screen to get and transform to a rectangle?
 #(use select.html to get coordinates with your mouse, click to copy to clipboard)

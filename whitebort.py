@@ -1,6 +1,7 @@
 import threading
 import time
 
+import settings
 import transform
 import whiteboardenhance
 from camera import Camera
@@ -46,11 +47,11 @@ class Whitebort(object):
         print('Starting camera thread.')
 
         prev_transform_frame=None
-
         sent_transform_frame=None
 
-
         while True:
+            start_time=time.time()
+
             print("Read...")
             self.input_frame=self.camera.get_frame()
             print("Transform...")
@@ -62,8 +63,6 @@ class Whitebort(object):
             self.whiteboardenhance_frame = whiteboardenhance.whiteboard_enhance(self.transform_frame)
             if self.sent_whiteboardenhance_frame is None:
                 self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
-
-
 
             if prev_transform_frame is not None:
                 print("Compare...")
@@ -91,6 +90,9 @@ class Whitebort(object):
             prev_transform_frame=self.transform_frame
 
             self.event.set()  # send signal to clients
+
             print("Sleep...")
-            time.sleep(5)
+            time_left=settings.frame_time-(time.time()-start_time)
+            if time_left>0:
+                time.sleep(time_left)
 
