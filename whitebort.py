@@ -53,49 +53,52 @@ class Whitebort(object):
             start_time=time.time()
 
             # print("Read...")
-            self.input_frame=self.camera.get_frame()
+            try:
+                self.input_frame=self.camera.get_frame()
 
-            if settings.save:
-                cv2.imwrite(f"{int(time.time())}.png",self.input_frame)
+                if settings.save:
+                    cv2.imwrite(f"{int(time.time())}.png",self.input_frame)
 
-            # print("Transform...")
-            self.transform_frame=transform.transform(self.input_frame)
-            if sent_transform_frame is None:
-                sent_transform_frame=self.transform_frame
+                # print("Transform...")
+                self.transform_frame=transform.transform(self.input_frame)
+                if sent_transform_frame is None:
+                    sent_transform_frame=self.transform_frame
 
-            # print("Enhance...")
-            self.whiteboardenhance_frame = whiteboardenhance.whiteboard_enhance(self.transform_frame)
-            if self.sent_whiteboardenhance_frame is None:
-                self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
+                # print("Enhance...")
+                self.whiteboardenhance_frame = whiteboardenhance.whiteboard_enhance(self.transform_frame)
+                if self.sent_whiteboardenhance_frame is None:
+                    self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
 
-            if prev_transform_frame is not None:
-                # print("Compare...")
-                change_count=compare.compare(prev_transform_frame, self.transform_frame, self.whiteboardenhance_frame)
+                if prev_transform_frame is not None:
+                    # print("Compare...")
+                    change_count=compare.compare(prev_transform_frame, self.transform_frame, self.whiteboardenhance_frame)
 
-                cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
-                            cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+                    cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
+                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
-                #no changes compared to last frame?
-                if change_count==0:
+                    #no changes compared to last frame?
+                    if change_count==0:
 
-                    #check again last sent frame:
-                    sent_change_count = compare.compare(sent_transform_frame, self.transform_frame,
-                                                   self.whiteboardenhance_frame)
-                    #there are actual usefull changes compared to last sent:
-                    if sent_change_count!=0:
-                        print("Detected {} usefull changes. Sending...".format(sent_change_count))
+                        #check again last sent frame:
+                        sent_change_count = compare.compare(sent_transform_frame, self.transform_frame,
+                                                       self.whiteboardenhance_frame)
+                        #there are actual usefull changes compared to last sent:
+                        if sent_change_count!=0:
+                            print("Detected {} usefull changes. Sending...".format(sent_change_count))
 
-                        sent_transform_frame=self.transform_frame
-                        self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
+                            sent_transform_frame=self.transform_frame
+                            self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
+                        else:
+                            print("No changes")
+
                     else:
-                        print("No changes")
+                        print("Detected movement: {} changes".format(change_count))
 
-                else:
-                    print("Detected movement: {} changes".format(change_count))
+                prev_transform_frame=self.transform_frame
 
-            prev_transform_frame=self.transform_frame
-
-            self.event.set()  # send signal to clients
+                self.event.set()  # send signal to clients
+            except Exception as e:
+                print(f"Error: {e}")
 
             # print("Sleep...")
             time_left=settings.frame_time-(time.time()-start_time)

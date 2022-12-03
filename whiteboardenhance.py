@@ -213,7 +213,7 @@ def whiteboard_enhance(img):
 
     # dog_sigma_1, dog_sigma_2 = 100, 0
     # # cs_black_per, cs_white_per = 0.01, 0.5
-    # cs_black_per, cs_white_per = 2, 99.5
+    # cs_black_per, cs_white_per = 1, 99
     #
     # gauss_k_size, gauss_sigma = 3, 1
     # gamma_value = 1.1
@@ -227,7 +227,7 @@ def whiteboard_enhance(img):
 
     # Contrast Stretch (CS)
     contrast_stretch_img = contrast_stretch(negative_img, cs_black_per, cs_white_per)
-    return contrast_stretch_img
+    # return contrast_stretch_img
 
     # Gaussian Blur
     blur_img = fast_gaussian_blur(contrast_stretch_img, gauss_k_size, gauss_sigma)

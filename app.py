@@ -58,13 +58,13 @@ def stream(id):
 
 if settings.mode=='pi':
     from camera_pi import CameraPi
-    camera = CameraPi(frame_delay=1)
+    camera = CameraPi()
 elif settings.mode=='opencv':
     from camera_opencv import CameraOpenCV
-    camera = CameraOpenCV(frame_delay=1)
+    camera = CameraOpenCV()
 elif settings.mode == 'url':
     from camera_url import CameraURL
-    camera = CameraURL(settings.url, frame_delay=0)
+    camera = CameraURL(settings.url)
 elif settings.mode=='test':
     from camera_test import CameraTest
     camera = CameraTest()
