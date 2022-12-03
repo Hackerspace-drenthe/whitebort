@@ -52,21 +52,24 @@ class Whitebort(object):
         while True:
             start_time=time.time()
 
-            print("Read...")
+            # print("Read...")
             self.input_frame=self.camera.get_frame()
 
-            print("Transform...")
+            if settings.save:
+                cv2.imwrite(f"{int(time.time())}.png",self.input_frame)
+
+            # print("Transform...")
             self.transform_frame=transform.transform(self.input_frame)
             if sent_transform_frame is None:
                 sent_transform_frame=self.transform_frame
 
-            print("Enhance...")
+            # print("Enhance...")
             self.whiteboardenhance_frame = whiteboardenhance.whiteboard_enhance(self.transform_frame)
             if self.sent_whiteboardenhance_frame is None:
                 self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
 
             if prev_transform_frame is not None:
-                print("Compare...")
+                # print("Compare...")
                 change_count=compare.compare(prev_transform_frame, self.transform_frame, self.whiteboardenhance_frame)
 
                 cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
@@ -74,6 +77,7 @@ class Whitebort(object):
 
                 #no changes compared to last frame?
                 if change_count==0:
+
                     #check again last sent frame:
                     sent_change_count = compare.compare(sent_transform_frame, self.transform_frame,
                                                    self.whiteboardenhance_frame)
@@ -83,15 +87,17 @@ class Whitebort(object):
 
                         sent_transform_frame=self.transform_frame
                         self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
+                    else:
+                        print("No changes")
 
                 else:
-                    print("detected movement: {} changes".format(change_count))
+                    print("Detected movement: {} changes".format(change_count))
 
             prev_transform_frame=self.transform_frame
 
             self.event.set()  # send signal to clients
 
-            print("Sleep...")
+            # print("Sleep...")
             time_left=settings.frame_time-(time.time()-start_time)
             if time_left>0:
                 time.sleep(time_left)
