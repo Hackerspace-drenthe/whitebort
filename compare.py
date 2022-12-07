@@ -2,24 +2,24 @@
 import cv2
 from skimage.metrics import structural_similarity
 
+import settings
 
 
-def mark_rect(mark, p1, p2, on=10, step=20, thick=1):
+def mark_rect(mark, p1, p2, on=10, step=20, thick=1, color=(128,128,128)):
+    # cv2.rectangle(mark, p1, p2, color,thick)
 
     for x in range(p1[0], p2[0], step):
-        cv2.line(mark, (x, p1[1]), (x + on, p1[1]), (128, 128, 128), thick)
-        cv2.line(mark, (x, p2[1]), (x + on, p2[1]), (128, 128, 128), thick)
+        cv2.line(mark, (x, p1[1]), (x + on, p1[1]), color, thick)
+        cv2.line(mark, (x, p2[1]), (x + on, p2[1]), color, thick)
 
     for y in range(p1[1], p2[1], step):
-        cv2.line(mark, (p1[0], y), (p1[0], y + on), (128, 128, 128), thick)
-        cv2.line(mark, (p2[0],y), (p2[0], y + on), (128, 128, 128), thick)
+        cv2.line(mark, (p1[0], y), (p1[0], y + on), color, thick)
+        cv2.line(mark, (p2[0],y), (p2[0], y + on), color, thick)
 
 
 def compare(before, after, mark=None):
     """compare before and after, and mark differces in mark. returns similarity score """
 
-    #winsize is belangrijk voor grootte van detectie
-    win_size=2.5
 
     # Convert images to grayscale
     before_gray = cv2.cvtColor(before, cv2.COLOR_BGR2GRAY)
@@ -30,7 +30,11 @@ def compare(before, after, mark=None):
 
     # Compute SSIM between the two images
     (score, diff) = structural_similarity(before_gray, after_gray, full=True,  gaussian_weights=True, sigma=0.25)
-    # (score, diff) = structural_similarity(before_gray, after_gray, full=True,  win_size=3, data_range=1000)
+    #winsize is belangrijk voor grootte van detectie
+    win_size=3
+    # data_range kleiner = pakt kleinere changes/meer noise?
+    # win_size kleiner beteknd ook data_range kleiner maken
+    # (score, diff) = structural_similarity(before_gray, after_gray, full=True,  win_size=win_size, data_range=1000)
     # (score, diff) = structural_similarity(before_gray, after_gray, full=True,  gaussian_weights=True, sigma=0.25,data_range=1000)
 
 
@@ -54,7 +58,7 @@ def compare(before, after, mark=None):
     change_count=0
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 10 and area<100000:
+        if area > settings.min_change_area:#and area<100000:
             change_count=change_count+1
             # print("contour:", area)
             x, y, w, h = cv2.boundingRect(c)
