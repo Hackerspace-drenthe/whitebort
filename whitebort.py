@@ -30,8 +30,8 @@ class Whitebort(object):
         self.last_access = time.time()
 
         # start background frame thread
-        # self.thread = threading.Thread(target=asyncio.run , args=self._thread)
-        # self.thread.start()
+        self.thread = threading.Thread(target=self._thread)
+        self.thread.start()
 
         self.input_frame=[]
 
@@ -46,7 +46,7 @@ class Whitebort(object):
 
         return [self.input_frame, self.transform_frame, self.whiteboardenhance_frame, self.sent_whiteboardenhance_frame]
 
-    async def _thread(self):
+    def _thread(self):
         """Camera background thread."""
         print('Starting camera thread.')
 
@@ -114,8 +114,5 @@ class Whitebort(object):
             # print("Sleep...")
             time_left=settings.frame_time-(time.time()-start_time)
             if time_left>0:
-                await asyncio.sleep(time_left)
-            else:
-                await asyncio.sleep(0)
-
+                time.sleep(time_left)
 
