@@ -211,13 +211,8 @@ def whiteboard_enhance(img):
     cb_black_per, cb_white_per = 2, 1
 
 
-    # dog_sigma_1, dog_sigma_2 = 100, 0
-    # # cs_black_per, cs_white_per = 0.01, 0.5
-    # cs_black_per, cs_white_per = 1, 99
-    #
-    # gauss_k_size, gauss_sigma = 3, 1
-    # gamma_value = 1.1
-    # cb_black_per, cb_white_per = 2, 0.5
+    #moest ivm ruis
+    cs_black_per, cs_white_per = 0.5, 99.5
 
     # Difference of Gaussian (DoG)
     dog_img = dog(img, settings.dog_k_size, dog_sigma_1, dog_sigma_2)
