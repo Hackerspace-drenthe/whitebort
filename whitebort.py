@@ -10,7 +10,6 @@ from clientevent import ClientEvent
 import compare
 import cv2
 
-from telegram_send import TelegramSend
 
 
 class Whitebort(object):
@@ -63,7 +62,7 @@ class Whitebort(object):
             # print("Read...")
             try:
                 self.input_frame=self.camera.get_frame()
-                print("got")
+                # print("got")
 
                 if settings.save:
                     cv2.imwrite(f"{int(time.time())}.png",self.input_frame)

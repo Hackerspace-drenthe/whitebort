@@ -5,3 +5,4 @@ scikit-metrics
 scikit-image
 python-telegram
 requests
+aiogram

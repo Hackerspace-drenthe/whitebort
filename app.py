@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import argparse
 import sys
+import time
+
 import settings
 
 #modified from https://github.com/miguelgrinberg/flask-video-streaming
@@ -10,9 +12,7 @@ import os
 from flask import Flask, render_template, Response
 from _thread import get_ident
 
-
-
-
+import telegram_send
 from whitebort import Whitebort
 
 app = Flask(__name__)
@@ -74,6 +74,10 @@ if len(sys.argv)==2:
     frame=camera.get_frame()
     cv2.imwrite(sys.argv[1], frame)
     sys.exit(0)
+
+telegram_bot=telegram_send.TelegramBot()
+
+
 
 whitebort=Whitebort(camera)
 
