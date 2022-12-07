@@ -10,6 +10,7 @@ from aiogram.utils import executor
 import secret_settings
 import state
 import asyncio
+import aiogram
 
 class TelegramBot(state.State):
     def __init__(self):
@@ -49,6 +50,16 @@ class TelegramBot(state.State):
         for chat_id in self.state.joined_ids:
             await self.bot.send_message(chat_id, text)
 
+
+    def send_message_image(self, file_name):
+        """send message to all joined clients"""
+
+        for chat_id in self.state.joined_ids:
+            image = aiogram.types.input_file.InputFile(file_name)
+            self.task_queue.append(self.bot.send_photo(chat_id, image))
+
+
+
     async def _send_queued(self):
         while True:
             await asyncio.sleep(1)
@@ -56,8 +67,8 @@ class TelegramBot(state.State):
                 task=self.task_queue.pop()
                 await task
 
-    def send_message_joined_sync(self, text):
-        self.task_queue.append(self.send_message_joined(text))
+    # def send_message_joined_sync(self, text):
+    #     self.task_queue.append(self.send_message_joined(text))
 
     def run(self):
         print("Telegram thread\n\n")

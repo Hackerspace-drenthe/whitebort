@@ -1,4 +1,3 @@
-import asyncio
 import threading
 import time
 
@@ -10,18 +9,20 @@ from clientevent import ClientEvent
 import compare
 import cv2
 
+from telegram_bot import TelegramBot
 
 
 class Whitebort(object):
 
-    def __init__(self, camera:Camera, frame_delay=0):
+    def __init__(self, camera:Camera, bot: TelegramBot):
 
         self.camera=camera
+        self.bot=bot
         self.thread = None  # background thread that reads frames from camera
         self.frame = None  # current frame is stored here by background thread
         self.last_access = 0  # time of last client access to the camera
         self.event = ClientEvent()
-        self.frame_delay=frame_delay
+
         self.whiteboardenhance_frame=None
         self.sent_whiteboardenhance_frame=None
 
@@ -63,6 +64,9 @@ class Whitebort(object):
             try:
                 self.input_frame=self.camera.get_frame()
                 # print("got")
+                # cv2.imwrite("whiteboard.png", self.input_frame)
+                # self.bot.send_message_image("whiteboard.png")
+                # print("sent")
 
                 if settings.save:
                     cv2.imwrite(f"{int(time.time())}.png",self.input_frame)
@@ -98,6 +102,10 @@ class Whitebort(object):
                                         cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
                             self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
+                            cv2.imwrite("whiteboard.png", self.sent_whiteboardenhance_frame)
+                            self.bot.send_message_image("whiteboard.png")
+
+
                         else:
                             print("No changes")
 

@@ -12,7 +12,7 @@ import os
 from flask import Flask, render_template, Response
 from _thread import get_ident
 
-import telegram_send
+import telegram_bot
 from whitebort import Whitebort
 
 app = Flask(__name__)
@@ -75,11 +75,9 @@ if len(sys.argv)==2:
     cv2.imwrite(sys.argv[1], frame)
     sys.exit(0)
 
-telegram_bot=telegram_send.TelegramBot()
+telegram_bot=telegram_bot.TelegramBot()
 
-
-
-whitebort=Whitebort(camera)
+whitebort=Whitebort(camera, telegram_bot)
 
 # transformed=CameraTransform(input_stream)
 # enhanced=CameraWhiteboardEnhance(transformed)
