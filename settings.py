@@ -2,7 +2,7 @@
 
 url="http://10.0.0.6:5000"
 mode="url" # can be opencv, pi, test, url
-frame_time=10
+frame_time=1
 
 #save images, for testing
 save=True
@@ -12,8 +12,8 @@ top_right_factor = (0.177,0.861)
 bottom_left_factor = (0.685,0.27)
 bottom_right_factor =(0.187,0.304)
 
-dog_k_size =15
-min_change_area=100
+dog_k_size =60
+min_change_area=25
 max_change_area=10000
 
 

@@ -203,7 +203,7 @@ def color_balance(img, low_per, high_per):
 def whiteboard_enhance(img):
     '''Enhance Whiteboard image'''
 
-    # parameters for enhancing functions
+    # default settings:
     dog_k_size, dog_sigma_1, dog_sigma_2 = 15, 100, 0
     cs_black_per, cs_white_per = 2, 99.5
     gauss_k_size, gauss_sigma = 3, 1
@@ -212,7 +212,10 @@ def whiteboard_enhance(img):
 
 
     #moest ivm ruis
-    cs_black_per, cs_white_per = 0.5, 99.5
+    cs_black_per, cs_white_per = 1.5, 99.5
+    #was te blurry
+    gauss_k_size, gauss_sigma = 2, 1
+
 
     # Difference of Gaussian (DoG)
     dog_img = dog(img, settings.dog_k_size, dog_sigma_1, dog_sigma_2)
@@ -220,15 +223,22 @@ def whiteboard_enhance(img):
     # Negative of image
     negative_img = negate(dog_img)
 
+
     # Contrast Stretch (CS)
+    #VERANDERD KLEUR
     contrast_stretch_img = contrast_stretch(negative_img, cs_black_per, cs_white_per)
     # return contrast_stretch_img
 
+    # return contrast_stretch_img
+
+    #TODO: BLUR MINDER
     # Gaussian Blur
     blur_img = fast_gaussian_blur(contrast_stretch_img, gauss_k_size, gauss_sigma)
 
+
     # Gamma Correction
     gamma_img = gamma(blur_img, gamma_value)
+
 
     # Color Balance (CB) (also Contrast Stretch)
     color_balanced_img = color_balance(gamma_img, cb_black_per, cb_white_per)
