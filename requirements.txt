@@ -2,3 +2,4 @@ Flask
 numpy
 opencv-python==4.5.5.64
 scikit-metrics
+python-telegram-bot

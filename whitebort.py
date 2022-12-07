@@ -1,3 +1,4 @@
+import asyncio
 import threading
 import time
 
@@ -8,6 +9,9 @@ from camera import Camera
 from clientevent import ClientEvent
 import compare
 import cv2
+
+from telegram_send import TelegramSend
+
 
 class Whitebort(object):
 
@@ -26,8 +30,8 @@ class Whitebort(object):
         self.last_access = time.time()
 
         # start background frame thread
-        self.thread = threading.Thread(target=self._thread)
-        self.thread.start()
+        # self.thread = threading.Thread(target=asyncio.run , args=self._thread)
+        # self.thread.start()
 
         self.input_frame=[]
 
@@ -42,12 +46,16 @@ class Whitebort(object):
 
         return [self.input_frame, self.transform_frame, self.whiteboardenhance_frame, self.sent_whiteboardenhance_frame]
 
-    def _thread(self):
+    async def _thread(self):
         """Camera background thread."""
         print('Starting camera thread.')
 
         prev_transform_frame=None
         sent_transform_frame=None
+
+        # bot=TelegramSend()
+        # print((await bot.bot.get_updates()))
+
 
         while True:
             start_time=time.time()
@@ -55,6 +63,7 @@ class Whitebort(object):
             # print("Read...")
             try:
                 self.input_frame=self.camera.get_frame()
+                print("got")
 
                 if settings.save:
                     cv2.imwrite(f"{int(time.time())}.png",self.input_frame)
@@ -73,8 +82,6 @@ class Whitebort(object):
                     # print("Compare...")
                     change_count=compare.compare(prev_transform_frame, self.transform_frame, self.whiteboardenhance_frame)
 
-                    cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
                     #no changes compared to last frame?
                     if change_count==0:
@@ -87,6 +94,10 @@ class Whitebort(object):
                             print("Detected {} usefull changes. Sending...".format(sent_change_count))
 
                             sent_transform_frame=self.transform_frame
+
+                            cv2.putText(self.whiteboardenhance_frame, "{} changes".format(sent_change_count), (10, 100),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+
                             self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
                         else:
                             print("No changes")
@@ -103,5 +114,8 @@ class Whitebort(object):
             # print("Sleep...")
             time_left=settings.frame_time-(time.time()-start_time)
             if time_left>0:
-                time.sleep(time_left)
+                await asyncio.sleep(time_left)
+            else:
+                await asyncio.sleep(0)
+
 
