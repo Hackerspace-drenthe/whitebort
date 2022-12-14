@@ -3,6 +3,10 @@
 url="http://10.0.0.6:5000"
 mode="url" # can be opencv, pi, test, url
 frame_time=1
+sent_transform_frame_file="whiteboard.png"
+
+#number of seconds with no changes after which we will sent the frame to telegram:
+no_change_time=10
 
 #save images, for testing
 save=True
