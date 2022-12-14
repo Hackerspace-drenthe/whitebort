@@ -67,10 +67,6 @@ class Whitebort(object):
         self.transform_frame = transform.transform(self.input_frame)
         self.whiteboardenhance_frame = whiteboardenhance.whiteboard_enhance(self.transform_frame)
 
-        if self.sent_transform_frame is None:
-            #ignore and store for next comparison
-            self.sent_transform_frame=self.transform_frame
-            self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
 
 
     def wait_while_movement(self):
@@ -101,16 +97,30 @@ class Whitebort(object):
 
     def compare_and_send(self):
         """compare transformed frame against last sent transformed frame. """
-        change_count = compare.compare(self.transform_frame, self.sent_transform_frame)
+
+        if self.sent_transform_frame is None:
+            #ignore and store for next comparison
+            self.sent_transform_frame=self.transform_frame
+            self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
+            print("(Ignoring first changes)")
+            return
+
+        change_count = compare.compare(self.transform_frame, self.sent_transform_frame, self.whiteboardenhance_frame)
         if change_count>0:
             print("Sending {} actual changes to telegram.".format(change_count))
+            cv2.putText(self.whiteboardenhance_frame, "{} changes".format(change_count), (10, 100),
+                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
             self.sent_transform_frame=self.transform_frame
             self.sent_whiteboardenhance_frame=self.whiteboardenhance_frame
 
+            #store for future comparison after program restart
+            cv2.imwrite(settings.sent_transform_frame_file, self.sent_transform_frame)
+
             #sent to telegram
-            cv2.imwrite(settings.sent_transform_frame_file, self.sent_whiteboardenhance_frame)
-            self.bot.send_message_image(settings.sent_transform_frame_file)
+            telegram_file="telegram.png"
+            cv2.imwrite(telegram_file, self.sent_whiteboardenhance_frame)
+            self.bot.send_message_image(telegram_file)
         else:
             print("No actual changes found.")
 
