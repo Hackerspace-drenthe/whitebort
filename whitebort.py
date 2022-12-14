@@ -141,17 +141,57 @@ class Whitebort(object):
             else:
                 print("Waiting until there is movement...")
 
+    def wait_for_stable_change(self):
+        """process frames and wait until a change is stable
+
+        e.g.: change compared to previous sent_transform_frame is stable AND no movement compares to last_frame is stable.
+
+        """
+
+        self.process_frame()
+        last_frame = self.transform_frame
+        last_change_time=time.time()
+        last_sent_change_count=0
+
+        while True:
+            self.process_frame()
+            now=time.time()
+
+            # changes compared to last frame?
+            change_count = compare.compare(self.transform_frame, last_frame)
+            if change_count:
+                print("Movement detected: {} changes.".format(change_count))
+                last_change_time=now
+
+            # no changes to last sent frame? or number of changes has changed?
+            change_count = compare.compare(self.transform_frame, self.sent_transform_frame)
+            if change_count==0 or change_count!=last_sent_change_count:
+                if change_count!=last_sent_change_count:
+                    print("Unstable changes: {} (was {})".format(change_count, last_sent_change_count))
+                elif change_count==0:
+                    print("No changes")
+
+                last_change_time=now
+                last_sent_change_count=change_count
+
+            no_change_time = int(now - last_change_time)
+            if no_change_time > settings.no_change_time:
+                print("Stable change detected!".format(settings.no_change_time))
+                return
+            else:
+                if no_change_time>0:
+                    print("Board has {} stable changes for {} seconds. (waiting {}s)".format(change_count, no_change_time, settings.no_change_time))
+
+            last_frame = self.transform_frame
 
     def _thread(self):
         """Camera background thread."""
         print('Starting camera thread.')
 
         while True:
-            self.wait_while_movement()
-
+            self.wait_for_stable_change()
             self.compare_and_send()
 
-            self.wait_until_movement()
 
             # start_time=time.time()
             #
