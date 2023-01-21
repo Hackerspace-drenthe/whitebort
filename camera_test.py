@@ -26,6 +26,7 @@ class CameraTest(Camera):
         super().__init__()
 
         self.files = glob.glob("test/*.png")
+        self.files.sort()
         self.file_nr=0
 
 
