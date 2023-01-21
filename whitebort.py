@@ -120,7 +120,7 @@ class Whitebort(object):
             now=time.time()
 
             # changes compared to last frame?
-            change_count = compare.compare(self.transform_frame, last_frame)
+            change_count = compare.compare(self.transform_frame, last_frame, self.whiteboardenhance_frame)
             if change_count:
                 print("Movement detected: {} changes.".format(change_count))
                 last_change_time=now
