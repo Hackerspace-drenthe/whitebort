@@ -1,7 +1,7 @@
 ### HSD whiteboard
 
 url="http://10.0.0.6:5000"
-mode="url" # can be opencv, pi, test, url
+mode="test" # can be opencv, pi, test, url
 frame_time=1
 sent_transform_frame_file="whiteboard.png"
 

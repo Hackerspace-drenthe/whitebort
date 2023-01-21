@@ -60,8 +60,9 @@ class Whitebort(object):
     def process_frame(self):
         """get next frame, do processing and store in self"""
         self.input_frame = self.camera.get_frame()
+        self.event.set()
 
-        if settings.save:
+        if settings.save and settings.mode!="test":
             cv2.imwrite(f"{int(time.time())}.png", self.input_frame)
 
         self.transform_frame = transform.transform(self.input_frame)
