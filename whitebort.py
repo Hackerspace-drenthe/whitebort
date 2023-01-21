@@ -60,7 +60,12 @@ class Whitebort(object):
 
     def process_frame(self):
         """get next frame, do processing and store in self"""
-        self.frames['input'] = self.camera.get_frame()
+
+        frame=self.camera.get_frame()
+        if frame is None:
+            return
+
+        self.frames['input'] = frame
         self.event.set()
 
         if settings.save and settings.mode != "test":
