@@ -29,6 +29,9 @@ class CameraTest(Camera):
         self.files.sort()
         self.file_nr=0
 
+        while self.files.pop(0)!="test/1670449338.png":
+            pass
+
 
     def get_frame(self):
         # time.sleep(1)

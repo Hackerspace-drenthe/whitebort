@@ -22,6 +22,7 @@ class Whitebort(object):
         self.thread = None  # background thread that reads frames from camera
         self.last_access = 0  # time of last client access to the camera
         self.event = ClientEvent()
+        self.compare= compare.Compare()
 
         self.frames = {
             'input': None,  # raw input frame from cam
@@ -33,10 +34,10 @@ class Whitebort(object):
 
         }
 
-        if os.path.isfile(settings.sent_transform_frame_file):
-            self.frames['sent_transform'] = cv2.imread(settings.sent_transform_frame_file)
-        else:
-            print("ERROR: {} not found!".format(settings.sent_transform_frame_file))
+        # if os.path.isfile(settings.sent_transform_frame_file):
+        #     self.frames['sent_transform'] = cv2.imread(settings.sent_transform_frame_file)
+        # else:
+        #     print("ERROR: {} not found!".format(settings.sent_transform_frame_file))
 
         """Start the background camera thread if it isn't running yet."""
         self.last_access = time.time()
@@ -74,46 +75,33 @@ class Whitebort(object):
         self.frames['transform'] = transform.transform(self.frames['input'])
         self.frames['whiteboardenhance'] = whiteboardenhance.whiteboard_enhance(self.frames['transform'])
 
-    def compare_and_send(self):
-        """compare transformed frame against last sent transformed frame. """
+    def send(self):
+        """send current frames and store for next comparison"""
 
-        if self['sent_transform'] is None:
-            # ignore and store for next comparison
-            self.frames['sent_transform'] = self.frames['transform']
-            self.sent_whiteboardenhance_frame = self.frames['whiteboardenhance']
-            print("(Ignoring first changes)")
-            return
+        change_count = self.compare.get_changes()
+        print("Sending {} actual changes to telegram.".format(change_count))
+        cv2.putText(self.frames['whiteboardenhance'], "{} changes".format(change_count), (10, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
-        change_count = compare.compare(self.frames['transform'], self.frames['sent_transform'], self.frames['whiteboardenhance'])
-        if change_count > 0:
-            print("Sending {} actual changes to telegram.".format(change_count))
-            cv2.putText(self.frames['whiteboardenhance'], "{} changes".format(change_count), (10, 100),
-                        cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+        self.frames['sent_transform'] = self.frames['transform']
+        self.frames['sent_whiteboardenhance'] = self.frames['whiteboardenhance']
 
-            self.frames['sent_transform'] = self.frames['transform']
-            self.frames['sent_whiteboardenhance'] = self.frames['whiteboardenhance']
+        cv2.imwrite(settings.sent_transform_frame_file, self.frames['sent_transform'])
 
-            # store for future comparison after program restart
-            cv2.imwrite(settings.sent_transform_frame_file, self.frames['sent_transform'])
-
-            # sent to telegram
-            if self.bot:
-                telegram_file = "telegram.png"
-                cv2.imwrite(telegram_file, self.sent_whiteboardenhance_frame)
-                self.bot.send_message_image(telegram_file)
-        else:
-            print("No actual changes found.")
+        # sent to telegram
+        if self.bot:
+            telegram_file = "telegram.png"
+            cv2.imwrite(telegram_file, self.sent_whiteboardenhance_frame)
+            self.bot.send_message_image(telegram_file)
 
     def wait_for_stable_change(self):
         """process frames and wait until a change is stable
-
-        e.g.: change compared to previous sent_transform_frame is stable AND no changes to last_frame is stable.
-        for a while.
-
         """
 
-        self.process_frame()
-        last_frame = self.frames['transform']
+        # self.process_frame()
+
+
+        # last_frame = self.frames['transform']
         last_change_time = time.time()
         last_sent_change_count = 0
 
@@ -121,34 +109,44 @@ class Whitebort(object):
             self.process_frame()
             now = time.time()
 
+            if self.frames['sent_transform'] is None:
+                self.frames['sent_transform'] = self.frames['transform']
+
             # changes compared to last frame?
-            change_count = compare.compare(self.frames['transform'], last_frame, self.frames['whiteboardenhance'])
-            if change_count:
-                print("Movement detected: {} changes.".format(change_count))
-                last_change_time = now
-
+            # change_count = compare.compare(self.frames['transform'], last_frame, self.frames['whiteboardenhance'])
+            # if change_count:
+            #     print("Movement detected: {} changes.".format(change_count))
+            #     last_change_time = now
             # no changes to last sent frame? or number of changes has changed?
-            change_count = compare.compare(self.frames['transform'], self.frames['sent_transform'])
-            if change_count == 0 or change_count != last_sent_change_count:
-                if change_count != last_sent_change_count:
-                    print("Unstable changes: {} (was {})".format(change_count, last_sent_change_count))
-                elif change_count == 0:
-                    print("No changes")
 
-                last_change_time = now
-                last_sent_change_count = change_count
+            changes=self.compare.update(self.frames['sent_transform'], self.frames['transform'])
+            print(changes, self.compare.get_changes())
 
-            no_change_time = int(now - last_change_time)
-            if no_change_time > settings.no_change_time:
-                print("Stable change detected!".format(settings.no_change_time))
+            self.compare.mark(self.frames['whiteboardenhance'])
+
+            if changes==0 and self.compare.get_changes()>0:
                 return
-            else:
-                if no_change_time > 0:
-                    print(
-                        "Board has {} stable changes for {} seconds. (waiting {}s)".format(change_count, no_change_time,
-                                                                                           settings.no_change_time))
 
-            last_frame = self.frames['transform']
+            # if change_count == 0 or change_count != last_sent_change_count:
+            #     if change_count != last_sent_change_count:
+            #         print("Unstable changes: {} (was {})".format(change_count, last_sent_change_count))
+            #     elif change_count == 0:
+            #         print("No changes")
+            #
+            #     last_change_time = now
+            #     last_sent_change_count = change_count
+            #
+            # no_change_time = int(now - last_change_time)
+            # if no_change_time > settings.no_change_time:
+            #     print("Stable change detected!".format(settings.no_change_time))
+            #     return
+            # else:
+            #     if no_change_time > 0:
+            #         print(
+            #             "Board has {} stable changes for {} seconds. (waiting {}s)".format(change_count, no_change_time,
+            #                                                                                settings.no_change_time))
+            #
+            # last_frame = self.frames['transform']
 
     def _thread(self):
         """Camera background thread."""
@@ -156,4 +154,5 @@ class Whitebort(object):
 
         while True:
             self.wait_for_stable_change()
-            self.compare_and_send()
+            self.send()
+            # self.compare_and_send()

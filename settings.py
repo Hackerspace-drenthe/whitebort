@@ -17,9 +17,11 @@ bottom_left_factor = (0.685,0.27)
 bottom_right_factor =(0.187,0.304)
 
 dog_k_size =60
-min_change_area=25
-max_change_area=10000
 
+
+compare_factor=20
+compare_clean_threshold=0.01
+compare_dirty_threshold=0.02
 
 
 # ### test whiteboard
