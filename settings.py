@@ -19,9 +19,10 @@ bottom_right_factor =(0.187,0.304)
 dog_k_size =60
 
 
-compare_factor=20
-compare_clean_threshold=0.01
+compare_factor=25
 compare_dirty_threshold=0.02
+compare_clean_threshold=compare_dirty_threshold
+# compare_clean_threshold=compare_dirty_threshold/2
 
 
 # ### test whiteboard

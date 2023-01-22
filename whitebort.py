@@ -105,12 +105,14 @@ class Whitebort(object):
         last_change_time = time.time()
         last_sent_change_count = 0
 
+        self.compare.clear()
         while True:
             self.process_frame()
             now = time.time()
 
             if self.frames['sent_transform'] is None:
                 self.frames['sent_transform'] = self.frames['transform']
+                self.frames['sent_whiteboardenhance']=self.frames['whiteboardenhance']
 
             # changes compared to last frame?
             # change_count = compare.compare(self.frames['transform'], last_frame, self.frames['whiteboardenhance'])

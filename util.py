@@ -13,7 +13,7 @@ def mark_rect(mark, p1, p2, on=10, step=20, thick=1, color=(128, 128, 128)):
 
 
 def yellow_marker(image, x1, y1, x2, y2):
-    rect = image[y1:y2, x1:x2]
+    rect = image[x1:x2, y1:y2]
 
     # Create a yellow color
     yellow = (128, 255, 255)
@@ -23,3 +23,28 @@ def yellow_marker(image, x1, y1, x2, y2):
 
     # Apply the yellow color to the white pixels
     rect[mask] = yellow
+
+def image_cells(image, factor):
+
+    width=image.shape[0]
+    height=image.shape[1]
+    # print(width, height)
+
+    scaled_width=width//factor
+    scaled_height=height//factor
+
+
+    # print("WIDTH",image.shape[0])
+    # print("widthlen", len(image) )
+
+    result=np.zeros( ( scaled_width ,scaled_height))
+
+    for x in range(0,scaled_width):
+        for y in range(0,scaled_height):
+            result[x][y]=np.mean(image[x*scaled_width:(x+1)*scaled_width, y*scaled_height:(y+1)*scaled_height])
+            # result[x][y]=np.mean(image[ y*scaled_height:(y+1)*scaled_height, x*scaled_width:(x+1)*scaled_width])
+
+    # np.mean(image[x * factor:(x + 1) * factor, y * factor:(y + 1) * factor])
+    # print ("result", result[0][0])
+    # print("cells", len(result), len(result[0]))
+    return result
