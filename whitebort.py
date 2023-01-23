@@ -1,5 +1,8 @@
 import threading
 import time
+from typing import Union
+
+import numpy
 
 import settings
 import transform
@@ -24,7 +27,7 @@ class Whitebort(object):
         self.event = ClientEvent()
         self.compare= compare.Compare()
 
-        self.frames = {
+        self.frames:dict[str, Union[numpy.ndarray, None]] = {
             'input': None,  # raw input frame from cam
             'transform': None,  # transformed frame (cropping, skew, rotate, mirror etc)
             'whiteboardenhance': None,  # transformed AND enchanged with whiteboard filter
@@ -86,26 +89,26 @@ class Whitebort(object):
         self.frames['sent_transform'] = self.frames['transform']
         self.frames['sent_whiteboardenhance'] = self.frames['whiteboardenhance']
 
+
         cv2.imwrite(settings.sent_transform_frame_file, self.frames['sent_transform'])
 
         # sent to telegram
         if self.bot:
             telegram_file = "telegram.png"
-            cv2.imwrite(telegram_file, self.sent_whiteboardenhance_frame)
+            cv2.imwrite(telegram_file, self.frames['sent_whiteboardenhance_frame'])
             self.bot.send_message_image(telegram_file)
+
+        a=self.frames['whiteboardenhance']
+
 
     def wait_for_stable_change(self):
         """process frames and wait until a change is stable
         """
 
-        # self.process_frame()
-
-
-        # last_frame = self.frames['transform']
-        last_change_time = time.time()
-        last_sent_change_count = 0
 
         self.compare.clear()
+        stable_change_counter=0
+
         while True:
             self.process_frame()
             now = time.time()
@@ -114,41 +117,17 @@ class Whitebort(object):
                 self.frames['sent_transform'] = self.frames['transform']
                 self.frames['sent_whiteboardenhance']=self.frames['whiteboardenhance']
 
-            # changes compared to last frame?
-            # change_count = compare.compare(self.frames['transform'], last_frame, self.frames['whiteboardenhance'])
-            # if change_count:
-            #     print("Movement detected: {} changes.".format(change_count))
-            #     last_change_time = now
-            # no changes to last sent frame? or number of changes has changed?
-
             changes=self.compare.update(self.frames['sent_transform'], self.frames['transform'])
             print(changes, self.compare.get_changes())
 
             self.compare.mark(self.frames['whiteboardenhance'])
 
             if changes==0 and self.compare.get_changes()>0:
-                return
-
-            # if change_count == 0 or change_count != last_sent_change_count:
-            #     if change_count != last_sent_change_count:
-            #         print("Unstable changes: {} (was {})".format(change_count, last_sent_change_count))
-            #     elif change_count == 0:
-            #         print("No changes")
-            #
-            #     last_change_time = now
-            #     last_sent_change_count = change_count
-            #
-            # no_change_time = int(now - last_change_time)
-            # if no_change_time > settings.no_change_time:
-            #     print("Stable change detected!".format(settings.no_change_time))
-            #     return
-            # else:
-            #     if no_change_time > 0:
-            #         print(
-            #             "Board has {} stable changes for {} seconds. (waiting {}s)".format(change_count, no_change_time,
-            #                                                                                settings.no_change_time))
-            #
-            # last_frame = self.frames['transform']
+                stable_change_counter=stable_change_counter+1
+                if stable_change_counter>settings.compare_stable_frames:
+                    return
+            else:
+                stable_change_counter=0
 
     def _thread(self):
         """Camera background thread."""
@@ -157,4 +136,3 @@ class Whitebort(object):
         while True:
             self.wait_for_stable_change()
             self.send()
-            # self.compare_and_send()
