@@ -20,8 +20,8 @@ dog_k_size =60
 
 
 compare_factor=20
-compare_dirty_threshold=0.03
-compare_clean_threshold=0.01
+compare_dirty_threshold=0.01
+compare_clean_threshold=0.005
 # compare_clean_threshold=compare_dirty_threshold/2
 
 

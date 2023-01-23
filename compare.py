@@ -68,26 +68,20 @@ class Compare:
         # print("diff cells", (differences[10]))
 
 
-        mean_differences = cv2.mean(differences)  # per chan\
-
-
-        mean_difference = 0
-        for d in mean_differences:
-            mean_difference = mean_difference + d
+        mean_difference = cv2.mean(differences)[0]
 
         changes = 0
 
         # get differences that are over the threshold, compare to the average change of all the cells.
-        print("shapes ", differences.shape)
         for x in range(0, differences.shape[0]):
             for y in range(0, differences.shape[1]):
                 diff = 0
                 # for channel_nr in range(0, 3):
                 #     diff = diff + differences[y][x][channel_nr]
 
-                # diff_factor = abs(diff - mean_difference) / (255 * 3)
+                # diff_factor = abs(diff - mean_difference) / (255)
                 # diff_factor = diff / (255 * 3)
-                diff_factor=differences[x][y]/255
+                diff_factor=(differences[x][y]-mean_difference)/255
 
                 # over threshold, flip cell to 'changed'
                 if diff_factor >= settings.compare_dirty_threshold and not self.grid[x][y]:
