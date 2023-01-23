@@ -28,23 +28,18 @@ def image_cells(image, factor):
 
     width=image.shape[0]
     height=image.shape[1]
-    # print(width, height)
 
     scaled_width=width//factor
     scaled_height=height//factor
 
 
-    # print("WIDTH",image.shape[0])
-    # print("widthlen", len(image) )
 
-    result=np.zeros( ( scaled_width ,scaled_height))
+    result=np.zeros( ( scaled_width ,scaled_height), np.uint8)
 
     for x in range(0,scaled_width):
         for y in range(0,scaled_height):
-            result[x][y]=np.mean(image[x*scaled_width:(x+1)*scaled_width, y*scaled_height:(y+1)*scaled_height])
-            # result[x][y]=np.mean(image[ y*scaled_height:(y+1)*scaled_height, x*scaled_width:(x+1)*scaled_width])
+            m=np.mean(image[x * factor:(x + 1) * factor, y * factor:(y + 1) * factor])
 
-    # np.mean(image[x * factor:(x + 1) * factor, y * factor:(y + 1) * factor])
-    # print ("result", result[0][0])
-    # print("cells", len(result), len(result[0]))
+            result[x][y]=m
+
     return result

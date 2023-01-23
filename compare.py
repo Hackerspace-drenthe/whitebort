@@ -56,6 +56,7 @@ class Compare:
         # before.shape[1] // settings.compare_factor, before.shape[0] // settings.compare_factor), 0,0, cv2.INTER_AREA )
         before_scaled=image_cells(before, settings.compare_factor)
 
+
         # after_scaled = cv2.resize(after, (
         # before.shape[1] // settings.compare_factor, before.shape[0] // settings.compare_factor),0,0, cv2.INTER_AREA)
         after_scaled=image_cells(after, settings.compare_factor)
