@@ -117,9 +117,7 @@ class Whitebort(object):
                 self.frames['sent_transform'] = self.frames['transform']
                 self.frames['sent_whiteboardenhance']=self.frames['whiteboardenhance']
 
-            changes=self.compare.update(self.frames['sent_transform'], self.frames['transform'])
-            print(changes, self.compare.get_changes())
-
+            changes=self.compare.update(self.frames['sent_whiteboardenhance'], self.frames['whiteboardenhance'])
             self.compare.mark(self.frames['whiteboardenhance'])
 
             if changes==0 and self.compare.get_changes()>0:

@@ -5,9 +5,6 @@ mode="test" # can be opencv, pi, test, url
 frame_time=1
 sent_transform_frame_file="whiteboard.png"
 
-
-
-
 #save images, for testing
 save=True
 
@@ -20,7 +17,7 @@ dog_k_size =60
 
 
 compare_factor=20
-compare_dirty_threshold=0.02
+compare_dirty_threshold=0.10
 compare_clean_threshold=compare_dirty_threshold/2
 compare_stable_frames=10
 # compare_clean_threshold=compare_dirty_threshold/2
