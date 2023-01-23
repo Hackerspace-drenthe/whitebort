@@ -30,9 +30,9 @@ class Whitebort(object):
         self.frames:dict[str, Union[numpy.ndarray, None]] = {
             'input': None,  # raw input frame from cam
             'transform': None,  # transformed frame (cropping, skew, rotate, mirror etc)
-            'whiteboardenhance': None,  # transformed AND enchanged with whiteboard filter
+            'filtered': None,  # transformed AND enchanged with whiteboard filter
 
-            'sent_whiteboardenhance': None,  # last sent frames to telegram
+            'sent_filtered': None,  # last sent frames to telegram
             'sent_transform': None
 
         }
@@ -76,18 +76,18 @@ class Whitebort(object):
             cv2.imwrite(f"{int(time.time())}.png", self.frames['input'])
 
         self.frames['transform'] = transform.transform(self.frames['input'])
-        self.frames['whiteboardenhance'] = whiteboardenhance.whiteboard_enhance(self.frames['transform'])
+        self.frames['filtered'] = whiteboardenhance.whiteboard_enhance(self.frames['transform'])
 
     def send(self):
         """send current frames and store for next comparison"""
 
         change_count = self.compare.get_changes()
         print("Sending {} actual changes to telegram.".format(change_count))
-        cv2.putText(self.frames['whiteboardenhance'], "{} changes".format(change_count), (10, 100),
+        cv2.putText(self.frames['filtered'], "{} changes".format(change_count), (10, 100),
                     cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
 
         self.frames['sent_transform'] = self.frames['transform']
-        self.frames['sent_whiteboardenhance'] = self.frames['whiteboardenhance']
+        self.frames['sent_filtered'] = self.frames['filtered']
 
 
         cv2.imwrite(settings.sent_transform_frame_file, self.frames['sent_transform'])
@@ -95,10 +95,10 @@ class Whitebort(object):
         # sent to telegram
         if self.bot:
             telegram_file = "telegram.png"
-            cv2.imwrite(telegram_file, self.frames['sent_whiteboardenhance_frame'])
+            cv2.imwrite(telegram_file, self.frames['sent_filtered'])
             self.bot.send_message_image(telegram_file)
 
-        a=self.frames['whiteboardenhance']
+        a=self.frames['filtered']
 
 
     def wait_for_stable_change(self):
@@ -115,10 +115,10 @@ class Whitebort(object):
 
             if self.frames['sent_transform'] is None:
                 self.frames['sent_transform'] = self.frames['transform']
-                self.frames['sent_whiteboardenhance']=self.frames['whiteboardenhance']
+                self.frames['sent_filtered']=self.frames['filtered']
 
-            changes=self.compare.update(self.frames['sent_whiteboardenhance'], self.frames['whiteboardenhance'])
-            self.compare.mark(self.frames['whiteboardenhance'])
+            changes=self.compare.update(self.frames['sent_filtered'], self.frames['filtered'])
+            self.compare.mark(self.frames['filtered'])
 
             if changes==0 and self.compare.get_changes()>0:
                 stable_change_counter=stable_change_counter+1
