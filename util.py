@@ -43,3 +43,7 @@ def image_cells(image, factor):
             result[x][y]=m
 
     return result
+
+def annotate(image, text):
+
+    cv2.putText(image, text, (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (128,128,128), 2)

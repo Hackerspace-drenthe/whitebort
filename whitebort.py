@@ -14,6 +14,7 @@ import cv2
 import os
 
 from telegram_bot import TelegramBot
+from util import annotate
 
 
 class Whitebort(object):
@@ -25,9 +26,9 @@ class Whitebort(object):
         self.thread = None  # background thread that reads frames from camera
         self.last_access = 0  # time of last client access to the camera
         self.event = ClientEvent()
-        self.compare= compare.Compare()
+        self.compare = compare.Compare()
 
-        self.frames:dict[str, Union[numpy.ndarray, None]] = {
+        self.frames: dict[str, Union[numpy.ndarray, None]] = {
             'input': None,  # raw input frame from cam
             'transform': None,  # transformed frame (cropping, skew, rotate, mirror etc)
             'filtered': None,  # transformed AND enchanged with whiteboard filter
@@ -65,7 +66,7 @@ class Whitebort(object):
     def process_frame(self):
         """get next frame, do processing and store in self"""
 
-        frame=self.camera.get_frame()
+        frame = self.camera.get_frame()
         if frame is None:
             return
 
@@ -77,20 +78,10 @@ class Whitebort(object):
 
         self.frames['transform'] = transform.transform(self.frames['input'])
         self.frames['filtered'] = whiteboardenhance.whiteboard_enhance(self.frames['transform'])
+        self.frames['annotated'] = self.frames['filtered'].copy()
 
     def send(self):
-        """send current frames and store for next comparison"""
-
-        change_count = self.compare.get_changes()
-        print("Sending {} actual changes to telegram.".format(change_count))
-        cv2.putText(self.frames['filtered'], "{} changes".format(change_count), (10, 100),
-                    cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
-
-        self.frames['sent_transform'] = self.frames['transform']
-        self.frames['sent_filtered'] = self.frames['filtered']
-
-
-        cv2.imwrite(settings.sent_transform_frame_file, self.frames['sent_transform'])
+        """send current frames out to the world"""
 
         # sent to telegram
         if self.bot:
@@ -98,38 +89,44 @@ class Whitebort(object):
             cv2.imwrite(telegram_file, self.frames['sent_filtered'])
             self.bot.send_message_image(telegram_file)
 
-        a=self.frames['filtered']
-
-
     def wait_for_stable_change(self):
         """process frames and wait until a change is stable
         """
 
-
+        # start with a clean comarison
+        self.frames['sent_transform'] = self.frames['transform']
+        self.frames['sent_filtered'] = self.frames['filtered']
         self.compare.clear()
-        stable_change_counter=0
 
+        stable_change_counter = 0
         while True:
             self.process_frame()
-            now = time.time()
 
-            if self.frames['sent_transform'] is None:
-                self.frames['sent_transform'] = self.frames['transform']
-                self.frames['sent_filtered']=self.frames['filtered']
+            current_changes = self.compare.update(self.frames['sent_filtered'], self.frames['filtered'])
+            changes_since_sent = self.compare.get_changes()
+            self.compare.mark(self.frames['annotated'])
 
-            changes=self.compare.update(self.frames['sent_filtered'], self.frames['filtered'])
-            self.compare.mark(self.frames['filtered'])
-
-            if changes==0 and self.compare.get_changes()>0:
-                stable_change_counter=stable_change_counter+1
-                if stable_change_counter>settings.compare_stable_frames:
+            if current_changes == 0 and changes_since_sent > 0:
+                stable_change_counter = stable_change_counter + 1
+                # changes are stable
+                if stable_change_counter > settings.compare_stable_frames:
+                    print(f"Sending {changes_since_sent} changes")
+                    cv2.imwrite(settings.sent_transform_frame_file, self.frames['sent_filtered'])
+                    annotate(self.frames['annotated'], f"{changes_since_sent} changes")
                     return
+                else:
+                    annotate(self.frames['annotated'], f"{changes_since_sent} changes")
+
             else:
-                stable_change_counter=0
+                annotate(self.frames['annotated'], f"{current_changes} changes, {changes_since_sent} since sent.")
+                stable_change_counter = 0
 
     def _thread(self):
         """Camera background thread."""
         print('Starting camera thread.')
+
+        # we need at least one frame to start
+        self.process_frame()
 
         while True:
             self.wait_for_stable_change()
