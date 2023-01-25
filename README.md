@@ -1,8 +1,7 @@
 Whiteboard change detection and automatic upload
-=====================
+================================================
 
 No documentation, figure it out or come back later :)
-
 
 Based on excellent code from:
 * [video streaming with Flask](http://blog.miguelgrinberg.com/post/video-streaming-with-flask) 
