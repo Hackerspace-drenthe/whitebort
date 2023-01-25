@@ -75,8 +75,8 @@ if len(sys.argv)==2:
     cv2.imwrite(sys.argv[1], frame)
     sys.exit(0)
 
-# telegram_bot=telegram_bot.TelegramBot()
-telegram_bot=None
+telegram_bot=telegram_bot.TelegramBot()
+# telegram_bot=None
 
 whitebort=Whitebort(camera, telegram_bot)
 

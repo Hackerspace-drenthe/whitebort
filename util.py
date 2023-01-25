@@ -25,6 +25,12 @@ def yellow_marker(image, x1, y1, x2, y2):
     rect[mask] = yellow
 
 def image_cells(image, factor):
+    """Scale image down to grayscale pixels by using actual mean()
+    (The regular cv2.resize options didnt do what i needed.)
+    This one divides the image in farely large cells and calculates the mean of each one.
+    Used in compare.py
+
+    """
 
     width=image.shape[0]
     height=image.shape[1]
@@ -44,6 +50,6 @@ def image_cells(image, factor):
 
     return result
 
-def annotate(image, text):
 
-    cv2.putText(image, text, (10, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (128,128,128), 2)
+def annotate(image, text):
+    cv2.putText(image, text, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (128,128,128), 2)
