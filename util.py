@@ -52,4 +52,5 @@ def image_cells(image, factor):
 
 
 def annotate(image, text):
+    print(f"Annotate: {text}")
     cv2.putText(image, text, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (128,128,128), 2)

@@ -1,10 +1,13 @@
 ### HSD whiteboard
 
-# url="http://10.0.0.6:5000"
+mode="url" # can be opencv, pi, test, url
+url="http://10.0.0.6:5000"
+
 # mode="test" # can be opencv, pi, test, url
 
-mode="url" # can be opencv, pi, test, url
-url="http://localhost:4000"
+# mode="url" # can be opencv, pi, test, url
+# url="http://localhost:4000"
+
 frame_time=1
 last_sent_file="whiteboard.png"
 
