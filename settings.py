@@ -1,8 +1,9 @@
 ### HSD whiteboard
 
 url="http://10.0.0.6:5000"
-mode="url" # can be opencv, pi, test, url
+mode="test" # can be opencv, pi, test, url
 frame_time=1
+sent_transform_frame_file="whiteboard.png"
 
 #save images, for testing
 save=True
@@ -13,9 +14,13 @@ bottom_left_factor = (0.685,0.27)
 bottom_right_factor =(0.187,0.304)
 
 dog_k_size =60
-min_change_area=25
-max_change_area=10000
 
+
+compare_factor=20
+compare_dirty_threshold=0.10
+compare_clean_threshold=compare_dirty_threshold/2
+compare_stable_frames=10
+# compare_clean_threshold=compare_dirty_threshold/2
 
 
 # ### test whiteboard

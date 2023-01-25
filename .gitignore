@@ -55,3 +55,7 @@ target/
 secret_settings.py
 *.png
 bot.state
+*.png
+.idea
+secret_settings.py
+bot.state

@@ -1,83 +1,107 @@
+import sys
 
 import cv2
-from skimage.metrics import structural_similarity
+import numpy
 
 import settings
+from util import yellow_marker, image_cells
 
 
-def mark_rect(mark, p1, p2, on=10, step=20, thick=1, color=(128,128,128)):
-    # cv2.rectangle(mark, p1, p2, color,thick)
+# Current algorithm:
+# - scale images down by a huge factor so that each pixel represents a 'cell' with the average value of that cell.
+# - absdiff both lowres images
+# - calculate mean absdiff
+# - determine change factor of each cell compared to mean absdiff
+# - if change factor is above or below a certain threshold, we set or clear the change status in our grid.
 
-    for x in range(p1[0], p2[0], step):
-        cv2.line(mark, (x, p1[1]), (x + on, p1[1]), color, thick)
-        cv2.line(mark, (x, p2[1]), (x + on, p2[1]), color, thick)
+# This should also be resilient to noise etc
 
-    for y in range(p1[1], p2[1], step):
-        cv2.line(mark, (p1[0], y), (p1[0], y + on), color, thick)
-        cv2.line(mark, (p2[0],y), (p2[0], y + on), color, thick)
+class Compare:
 
+    def __init__(self):
 
-def compare(before, after, mark=None):
-    """compare before and after, and mark differces in mark. returns similarity score """
+        self.grid = None
+        self.width = None
+        self.height = None
 
+    def create(self, width, height):
+        self.height = height
+        self.width = width
+        self.clear(
 
-    # Convert images to grayscale
-    before_gray = cv2.cvtColor(before, cv2.COLOR_BGR2GRAY)
-    after_gray = cv2.cvtColor(after, cv2.COLOR_BGR2GRAY)
+        )
 
-    # before_gray=cv2.fastNlMeansDenoising(before_gray)
-    # after_gray=cv2.fastNlMeansDenoising(after_gray)
+    def clear(self):
+        if self.width:
+            self.grid = numpy.zeros((self.width // settings.compare_factor, self.height // settings.compare_factor),
+                                    bool)
 
-    # Compute SSIM between the two images
-    (score, diff) = structural_similarity(before_gray, after_gray, full=True,  gaussian_weights=True, sigma=0.25)
-    #winsize is belangrijk voor grootte van detectie
-    win_size=3
-    # data_range kleiner = pakt kleinere changes/meer noise?
-    # win_size kleiner beteknd ook data_range kleiner maken
-    # (score, diff) = structural_similarity(before_gray, after_gray, full=True,  win_size=win_size, data_range=1000)
-    # (score, diff) = structural_similarity(before_gray, after_gray, full=True,  gaussian_weights=True, sigma=0.25,data_range=1000)
+    def get_changes(self):
 
+        changes = 0
+        for col in self.grid:
+            for cell in col:
+                if cell:
+                    changes = changes + 1
+        return changes
 
+    def update(self, before: numpy.ndarray, after: numpy.ndarray):
+        """compare before and after, and update our change-grid. returns number of changes made to the grid this time."""
 
-    # The diff image contains the actual image differences between the two images
-    # and is represented as a floating point data type in the range [0,1]
-    # so we must convert the array to 8-bit unsigned integers in the range
-    # [0,255] before we can use it with OpenCV
-    diff = (diff * 255).astype("uint8")
-    # diff_box = cv2.merge([diff, diff, diff])
+        if self.grid is None:
+            self.create(before.shape[0], before.shape[1])
 
-    # Threshold the difference image, followed by finding contours to
-    # obtain the regions of the two input images that differ
-    thresh = cv2.threshold(diff, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
-    contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = contours[0] if len(contours) == 2 else contours[1]
-
-    # mask = np.zeros(before.shape, dtype='uint8')
-    # filled_after = after.copy()
-
-    change_count=0
-    for c in contours:
-        area = cv2.contourArea(c)
-        if area > settings.min_change_area and area<settings.max_change_area:
-            change_count=change_count+1
-            # print("contour:", area)
-            x, y, w, h = cv2.boundingRect(c)
-            # cv2.rectangle(before, (x, y), (x + w, y + h), (36, 255, 12), 2)
-            if mark is not None:
-                mark_rect(mark, (x, y), (x + w, y + h))
-            # cv2.rectangle(diff_box, (x, y), (x + w, y + h), (36, 255, 12), 2)
-            # cv2.drawContours(mask, [c], 0, (255, 255, 255), -1)
-            # cv2.drawContours(filled_after, [c], 0, (0, 255, 0), -1)
-
-    # cv2.imshow('before', before)
-    # cv2.imshow('after', after)
-    # cv2.imshow('diff', diff)
-    # cv2.imshow('thresh', thresh)
-    # cv2.imshow('diff_box', diff_box)
-    # cv2.imshow('mask', mask)
-    # cv2.imshow('filled after', filled_after)
-    # cv2.waitKey()
+        # scale down by this factor. We will compare per 'cell'
+        # before_scaled = cv2.resize(before, (
+        # before.shape[1] // settings.compare_factor, before.shape[0] // settings.compare_factor), 0,0, cv2.INTER_AREA )
+        before_scaled=image_cells(before, settings.compare_factor)
 
 
-    # return score
-    return change_count
+        # after_scaled = cv2.resize(after, (
+        # before.shape[1] // settings.compare_factor, before.shape[0] // settings.compare_factor),0,0, cv2.INTER_AREA)
+        after_scaled=image_cells(after, settings.compare_factor)
+
+        # cv2.imwrite("test.png", before_scaled)
+        # sys.exit()
+
+        differences = cv2.absdiff(before_scaled, after_scaled)
+        # print("diff cells", (differences[10]))
+
+
+        mean_difference = cv2.mean(differences)[0]
+
+        changes = 0
+
+        # get differences that are over the threshold, compare to the average change of all the cells.
+        for x in range(0, differences.shape[0]):
+            for y in range(0, differences.shape[1]):
+                diff = 0
+                # for channel_nr in range(0, 3):
+                #     diff = diff + differences[y][x][channel_nr]
+
+                # diff_factor = abs(diff - mean_difference) / (255)
+                # diff_factor = diff / (255 * 3)
+                diff_factor=(differences[x][y]-mean_difference)/255
+
+                # over threshold, flip cell to 'changed'
+                if diff_factor >= settings.compare_dirty_threshold and not self.grid[x][y]:
+                    self.grid[x][y] = True
+                    changes = changes + 1
+                # under threshold, flip cell to 'unchanged'
+                elif diff_factor <= settings.compare_clean_threshold and self.grid[x][y]:
+                    self.grid[x][y] = False
+                    changes = changes + 1
+
+        return (changes)
+
+    def mark(self, image: numpy.ndarray):
+        """mark differences in image"""
+
+        print("GRIDSHAPE", self.grid.shape)
+        print("is" , self.grid.shape[0]*settings.compare_factor)
+
+        for x in range(0, self.grid.shape[0]):
+            for y in range(0, self.grid.shape[1]):
+                if self.grid[x][y]:
+                    yellow_marker(image, x * settings.compare_factor, y * settings.compare_factor,
+                                  (x + 1) * settings.compare_factor, (y + 1) * settings.compare_factor)

@@ -29,11 +29,11 @@ def select():
     return render_template('select.html')
 
 
-def stream_generator(frame_generator, nr):
+def stream_generator(frame_generator, id):
     """Video streaming generator function."""
 
     def send(wait):
-        frame = whitebort.get_frames(wait=wait)[nr]
+        frame = whitebort.get_frames(wait=wait)[id]
         jpg=cv2.imencode('.jpg', frame)[1].tobytes() #TODO: move? (now its processed for every client)
         yield b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n--frame\r\n'
 
@@ -50,7 +50,6 @@ def stream_generator(frame_generator, nr):
 
 @app.route('/stream/<id>')
 def stream(id):
-    id=int(id)
     return Response(stream_generator(whitebort, id),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -75,7 +74,8 @@ if len(sys.argv)==2:
     cv2.imwrite(sys.argv[1], frame)
     sys.exit(0)
 
-telegram_bot=telegram_bot.TelegramBot()
+# telegram_bot=telegram_bot.TelegramBot()
+telegram_bot=None
 
 whitebort=Whitebort(camera, telegram_bot)
 
