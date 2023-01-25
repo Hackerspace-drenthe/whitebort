@@ -1,12 +1,15 @@
 ### HSD whiteboard
 
-url="http://10.0.0.6:5000"
-mode="test" # can be opencv, pi, test, url
+# url="http://10.0.0.6:5000"
+# mode="test" # can be opencv, pi, test, url
+
+mode="url" # can be opencv, pi, test, url
+url="http://localhost:4000"
 frame_time=1
-sent_transform_frame_file="whiteboard.png"
+last_sent_file="whiteboard.png"
 
 #save images, for testing
-save=True
+save=False
 
 top_left_factor = (0.723,0.83)
 top_right_factor = (0.177,0.861)

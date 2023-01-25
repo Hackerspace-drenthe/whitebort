@@ -34,8 +34,9 @@ def stream_generator(frame_generator, id):
 
     def send(wait):
         frame = whitebort.get_frames(wait=wait)[id]
-        jpg=cv2.imencode('.jpg', frame)[1].tobytes() #TODO: move? (now its processed for every client)
-        yield b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n--frame\r\n'
+        if frame is not None:
+            jpg=cv2.imencode('.jpg', frame)[1].tobytes() #TODO: move? (now its processed for every client)
+            yield b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n--frame\r\n'
 
     yield b'--frame\r\n'
 

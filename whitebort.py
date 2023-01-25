@@ -30,18 +30,19 @@ class Whitebort(object):
 
         self.frames: dict[str, Union[numpy.ndarray, None]] = {
             'input': None,  # raw input frame from cam
-            'transform': None,  # transformed frame (cropping, skew, rotate, mirror etc)
-            'filtered': None,  # transformed AND enchanged with whiteboard filter
+            'transform': None,  # step 1 transformed frame (cropping, skew, rotate, mirror etc)
+            'filtered': None,  #  step 2 enchanged with whiteboard filter
+            'annotated': None, #  step 3 annotations (marks and text)
 
             'sent_filtered': None,  # last sent frames to telegram
-            'sent_transform': None
+            'sent_annotated': None
 
         }
 
-        # if os.path.isfile(settings.sent_transform_frame_file):
-        #     self.frames['sent_transform'] = cv2.imread(settings.sent_transform_frame_file)
-        # else:
-        #     print("ERROR: {} not found!".format(settings.sent_transform_frame_file))
+        if os.path.isfile(settings.last_sent_file):
+            self.frames['sent_filtered'] = cv2.imread(settings.last_sent_file)
+        else:
+            print("ERROR: {} not found!".format(settings.last_sent_file))
 
         """Start the background camera thread if it isn't running yet."""
         self.last_access = time.time()
@@ -86,7 +87,7 @@ class Whitebort(object):
         # sent to telegram
         if self.bot:
             telegram_file = "telegram.png"
-            cv2.imwrite(telegram_file, self.frames['sent_filtered'])
+            cv2.imwrite(telegram_file, self.frames['sent_annotated'])
             self.bot.send_message_image(telegram_file)
 
     def wait_for_stable_change(self):
@@ -94,7 +95,6 @@ class Whitebort(object):
         """
 
         # start with a clean comarison
-        self.frames['sent_transform'] = self.frames['transform']
         self.frames['sent_filtered'] = self.frames['filtered']
         self.compare.clear()
 
@@ -111,14 +111,15 @@ class Whitebort(object):
                 # changes are stable
                 if stable_change_counter > settings.compare_stable_frames:
                     print(f"Sending {changes_since_sent} changes")
-                    cv2.imwrite(settings.sent_transform_frame_file, self.frames['sent_filtered'])
-                    annotate(self.frames['annotated'], f"{changes_since_sent} changes")
+                    cv2.imwrite(settings.last_sent_file, self.frames['sent_filtered'])
+                    annotate(self.frames['annotated'], f"{changes_since_sent} changes.")
+                    self.frames['sent_annotated']=self.frames['annotated']
                     return
                 else:
-                    annotate(self.frames['annotated'], f"{changes_since_sent} changes")
+                    annotate(self.frames['annotated'], f"{changes_since_sent} stable changes (waiting {stable_change_counter/settings.compare_stable_frames})")
 
             else:
-                annotate(self.frames['annotated'], f"{current_changes} changes, {changes_since_sent} since sent.")
+                annotate(self.frames['annotated'], f"{current_changes} unstable changes.")
                 stable_change_counter = 0
 
     def _thread(self):

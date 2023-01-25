@@ -97,8 +97,7 @@ class Compare:
     def mark(self, image: numpy.ndarray):
         """mark differences in image"""
 
-        print("GRIDSHAPE", self.grid.shape)
-        print("is" , self.grid.shape[0]*settings.compare_factor)
+
 
         for x in range(0, self.grid.shape[0]):
             for y in range(0, self.grid.shape[1]):
