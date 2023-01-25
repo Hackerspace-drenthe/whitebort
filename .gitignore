@@ -53,3 +53,5 @@ docs/_build/
 # PyBuilder
 target/
 secret_settings.py
+*.png
+bot.state

@@ -9,6 +9,8 @@ import settings
 # https://gist.github.com/lelandbatey/8677901
 # which was based on some gimp magic that someone found out. (dead link)
 
+#Other things to try:
+#https://github.com/mzucker/noteshrink
 
 def normalize_kernel(kernel, k_width, k_height, scaling_factor=1.0):
     '''Zero-summing normalize kernel'''
