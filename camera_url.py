@@ -16,7 +16,7 @@ class CameraURL(Camera):
     def get_frame(self):
         while True:
             try:
-                resp = requests.get(self.url, stream=True).raw
+                resp = requests.get(self.url, stream=True, timeout=10).raw
                 image = np.asarray(bytearray(resp.read()), dtype="uint8")
                 frame=cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
                 # time.sleep(self.frame_delay)
